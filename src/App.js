@@ -195,29 +195,8 @@ const CoursePlanner = () => {
       delete newCompleted[id];
       setCompletedCourses(newCompleted);
     } else {
-      setCompletedCourses({ ...completedCourses, [id]: { grade: '' } });
+      setCompletedCourses({ ...completedCourses, [id]: { completed: true } });
     }
-  };
-
-  const setGrade = (id, grade) => {
-    setCompletedCourses({
-      ...completedCourses,
-      [id]: { grade }
-    });
-  };
-
-  const calculateGPA = () => {
-    const gradePoints = { 
-      'A+': 4.0, 'A': 4.0, 'A-': 3.7, 
-      'B+': 3.3, 'B': 3.0, 'B-': 2.7, 
-      'C+': 2.3, 'C': 2.0, 'C-': 1.7, 
-      'D+': 1.3, 'D': 1.0, 'D-': 0.7, 
-      'F': 0.0 
-    };
-    const completed = Object.entries(completedCourses).filter(([_, data]) => data.grade);
-    if (completed.length === 0) return 0;
-    const total = completed.reduce((sum, [_, data]) => sum + (gradePoints[data.grade] || 0), 0);
-    return (total / completed.length).toFixed(2);
   };
 
   const calculateCredits = () => {
@@ -270,9 +249,29 @@ const CoursePlanner = () => {
   const exportToEmail = () => {
     const credits = calculateCredits();
     let body = 'PIUS X COURSE PLANNER\n\n';
-    body += `GPA: ${calculateGPA()}\n`;
     body += `AP Credits: ${calculateAPCredits()}\n`;
     body += `Dual Credits: ${calculateDualCredits()}\n\n`;
+    body += 'REQUIREMENTS:\n';
+    Object.entries(requirements).forEach(([dept, req]) => {
+      body += `${dept}: ${credits[dept] || 0}/${req}\n`;
+    });
+    body += '\n\nSELECTED COURSES:\n';
+    ['Freshman', 'Sophomore', 'Junior', 'Senior'].forEach((year, idx) => {
+      const yearCourses = selectedCourses.filter(c => c.year === idx + 9);
+      if (yearCourses.length > 0) {
+        body += `\n${year.toUpperCase()}:\n`;
+        ['Fall', 'Spring'].forEach(sem => {
+          const semCourses = yearCourses.filter(c => c.semester === sem);
+          if (semCourses.length > 0) {
+            body += `  ${sem}:\n`;
+            semCourses.forEach(c => {
+              const status = completedCourses[c.id] ? '✓' : '○';
+              body += `    ${status} ${c.name}\n`;
+            });
+          }
+        });
+      }
+    });
     window.location.href = `mailto:?subject=My Pius X Course Plan&body=${encodeURIComponent(body)}`;
   };
 
@@ -658,7 +657,6 @@ const CoursePlanner = () => {
                                   course={course}
                                   completedCourses={completedCourses}
                                   toggleCompleted={toggleCompleted}
-                                  setGrade={setGrade}
                                   removeCourse={removeCourse}
                                 />
                               ))}
@@ -689,7 +687,6 @@ const CoursePlanner = () => {
                               course={course}
                               completedCourses={completedCourses}
                               toggleCompleted={toggleCompleted}
-                              setGrade={setGrade}
                               removeCourse={removeCourse}
                             />
                           ))}
@@ -709,13 +706,6 @@ const CoursePlanner = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-lg p-6 sticky top-4">
               <h2 className="text-2xl font-bold text-blue-900 mb-4">Summary</h2>
-              
-              <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-900">{calculateGPA()}</div>
-                  <div className="text-sm text-gray-600">Unweighted GPA</div>
-                </div>
-              </div>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="text-center p-3 bg-purple-50 rounded">
@@ -811,7 +801,7 @@ const CoursePlanner = () => {
   );
 };
 
-const CourseCard = ({ course, completedCourses, toggleCompleted, setGrade, removeCourse }) => {
+const CourseCard = ({ course, completedCourses, toggleCompleted, removeCourse }) => {
   const isCompleted = completedCourses[course.id];
   
   return (
@@ -829,31 +819,6 @@ const CourseCard = ({ course, completedCourses, toggleCompleted, setGrade, remov
             </button>
             <span className="font-medium">{course.name}</span>
           </div>
-          
-          {isCompleted && (
-            <div className="mt-2 ml-8">
-              <select
-                value={completedCourses[course.id].grade}
-                onChange={(e) => setGrade(course.id, e.target.value)}
-                className="border rounded px-2 py-1 text-sm"
-              >
-                <option value="">Select Grade</option>
-                <option value="A+">A+</option>
-                <option value="A">A</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B">B</option>
-                <option value="B-">B-</option>
-                <option value="C+">C+</option>
-                <option value="C">C</option>
-                <option value="C-">C-</option>
-                <option value="D+">D+</option>
-                <option value="D">D</option>
-                <option value="D-">D-</option>
-                <option value="F">F</option>
-              </select>
-            </div>
-          )}
         </div>
         
         <button
