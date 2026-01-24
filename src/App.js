@@ -8,6 +8,8 @@ const CoursePlanner = () => {
   const [showWelcome, setShowWelcome] = useState(true);
   const [welcomeStep, setWelcomeStep] = useState(1);
   const [userPreferences, setUserPreferences] = useState({ 
+    firstName: '',
+    gender: '',
     band: false, 
     choir: false,
     mathClass: '',
@@ -116,7 +118,7 @@ const CoursePlanner = () => {
   };
 
   const handleWelcomeSubmit = () => {
-    const { band, choir, mathClass } = userPreferences;
+    const { band, choir, mathClass, gender } = userPreferences;
     
     if (band) {
       addCourse('Marching Band', 'Fine Arts', 9, 'Fall');
@@ -124,8 +126,9 @@ const CoursePlanner = () => {
     }
     
     if (choir) {
-      addCourse("Women's Choir", 'Fine Arts', 9, 'Fall');
-      addCourse("Women's Choir", 'Fine Arts', 9, 'Spring');
+      const choirCourse = gender === 'female' ? "Women's Choir" : "Men's Choir";
+      addCourse(choirCourse, 'Fine Arts', 9, 'Fall');
+      addCourse(choirCourse, 'Fine Arts', 9, 'Spring');
     }
     
     if (mathClass) {
@@ -204,7 +207,13 @@ const CoursePlanner = () => {
   };
 
   const calculateGPA = () => {
-    const gradePoints = { 'A': 4.0, 'A-': 3.7, 'B+': 3.3, 'B': 3.0, 'B-': 2.7, 'C+': 2.3, 'C': 2.0, 'C-': 1.7, 'D+': 1.3, 'D': 1.0, 'F': 0.0 };
+    const gradePoints = { 
+      'A+': 4.0, 'A': 4.0, 'A-': 3.7, 
+      'B+': 3.3, 'B': 3.0, 'B-': 2.7, 
+      'C+': 2.3, 'C': 2.0, 'C-': 1.7, 
+      'D+': 1.3, 'D': 1.0, 'D-': 0.7, 
+      'F': 0.0 
+    };
     const completed = Object.entries(completedCourses).filter(([_, data]) => data.grade);
     if (completed.length === 0) return 0;
     const total = completed.reduce((sum, [_, data]) => sum + (gradePoints[data.grade] || 0), 0);
@@ -287,6 +296,94 @@ const CoursePlanner = () => {
           
           {welcomeStep === 1 && (
             <div className="space-y-6">
+              <div>
+                <label className="block text-lg font-semibold mb-2">What's your first name?</label>
+                <input
+                  type="text"
+                  value={userPreferences.firstName}
+                  onChange={(e) => setUserPreferences({ ...userPreferences, firstName: e.target.value })}
+                  placeholder="Enter your first name"
+                  className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-900 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-lg font-semibold mb-3">What is your gender?</label>
+                <div className="space-y-2">
+                  {['Male', 'Female'].map(gender => (
+                    <button
+                      key={gender}
+                      onClick={() => setUserPreferences({ ...userPreferences, gender: gender.toLowerCase() })}
+                      className={`w-full p-3 rounded-lg border-2 text-left transition ${
+                        userPreferences.gender === gender.toLowerCase()
+                          ? 'border-blue-900 bg-blue-50'
+                          : 'border-gray-200 hover:border-blue-300'
+                      }`}
+                    >
+                      {gender}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                onClick={() => setWelcomeStep(2)}
+                disabled={!userPreferences.firstName || !userPreferences.gender}
+                className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                Next
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </button>
+            </div>
+          )}
+
+          {welcomeStep === 2 && (
+            <div className="space-y-6">
+              <div className="border-2 border-gray-200 rounded-lg p-4">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={userPreferences.band}
+                    onChange={(e) => setUserPreferences({ ...userPreferences, band: e.target.checked })}
+                    className="w-5 h-5 text-blue-900 rounded"
+                  />
+                  <span className="ml-3 text-lg">Are you in Band?</span>
+                </label>
+              </div>
+
+              <div className="border-2 border-gray-200 rounded-lg p-4">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={userPreferences.choir}
+                    onChange={(e) => setUserPreferences({ ...userPreferences, choir: e.target.checked })}
+                    className="w-5 h-5 text-blue-900 rounded"
+                  />
+                  <span className="ml-3 text-lg">Are you in Choir?</span>
+                </label>
+              </div>
+
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setWelcomeStep(1)}
+                  className="flex-1 border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center"
+                >
+                  <ArrowLeft className="mr-2 w-5 h-5" />
+                  Back
+                </button>
+                <button
+                  onClick={() => setWelcomeStep(3)}
+                  className="flex-1 bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition flex items-center justify-center"
+                >
+                  Next
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {welcomeStep === 3 && (
+            <div className="space-y-6">
               <div className="border-2 border-gray-200 rounded-lg p-4">
                 <label className="flex items-center cursor-pointer">
                   <input
@@ -321,7 +418,7 @@ const CoursePlanner = () => {
             </div>
           )}
 
-          {welcomeStep === 2 && (
+          {welcomeStep === 3 && (
             <div className="space-y-6">
               <div>
                 <label className="block text-lg font-semibold mb-3">What math class will you start with as a freshman?</label>
@@ -344,7 +441,7 @@ const CoursePlanner = () => {
 
               <div className="flex space-x-2">
                 <button
-                  onClick={() => setWelcomeStep(1)}
+                  onClick={() => setWelcomeStep(2)}
                   className="flex-1 border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center"
                 >
                   <ArrowLeft className="mr-2 w-5 h-5" />
@@ -353,9 +450,9 @@ const CoursePlanner = () => {
                 <button
                   onClick={() => {
                     if (userPreferences.mathClass === 'Differentiated Geometry') {
-                      setWelcomeStep(3);
-                    } else if (userPreferences.mathClass === 'Differentiated Algebra II') {
                       setWelcomeStep(4);
+                    } else if (userPreferences.mathClass === 'Differentiated Algebra II') {
+                      setWelcomeStep(5);
                     } else {
                       handleWelcomeSubmit();
                     }
@@ -370,7 +467,7 @@ const CoursePlanner = () => {
             </div>
           )}
 
-          {welcomeStep === 3 && (
+          {welcomeStep === 4 && (
             <div className="space-y-6">
               <p className="text-lg">Have you completed or will you complete Algebra I in 7th grade?</p>
               
@@ -405,7 +502,7 @@ const CoursePlanner = () => {
             </div>
           )}
 
-          {welcomeStep === 4 && (
+          {welcomeStep === 5 && (
             <div className="space-y-6">
               <p className="text-lg">Have you completed or will you complete Differentiated Geometry as an 8th grader at Pius X?</p>
               
@@ -422,7 +519,7 @@ const CoursePlanner = () => {
                 <button
                   onClick={() => {
                     setUserPreferences({ ...userPreferences, mathClass: '', verifiedGeometry: false });
-                    setWelcomeStep(2);
+                    setWelcomeStep(3);
                   }}
                   className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition"
                 >
@@ -431,7 +528,7 @@ const CoursePlanner = () => {
               </div>
 
               <button
-                onClick={() => setWelcomeStep(2)}
+                onClick={() => setWelcomeStep(3)}
                 className="w-full border-2 border-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center"
               >
                 <ArrowLeft className="mr-2 w-5 h-5" />
@@ -448,24 +545,24 @@ const CoursePlanner = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-blue-900 text-white shadow-lg print:hidden">
+      <header className="bg-green-800 text-white shadow-lg print:hidden" style={{ backgroundColor: '#046a38' }}>
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <GraduationCap className="w-10 h-10" />
               <div>
                 <h1 className="text-2xl font-bold">Pius X High School</h1>
-                <p className="text-sm text-blue-200">Course Planner</p>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>Course Planner</p>
               </div>
             </div>
             <div className="flex space-x-2">
-              <button onClick={exportToEmail} className="p-2 hover:bg-blue-800 rounded" title="Email">
+              <button onClick={exportToEmail} className="p-2 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }} title="Email">
                 <Mail className="w-5 h-5" />
               </button>
-              <button onClick={printPlan} className="p-2 hover:bg-blue-800 rounded" title="Print">
+              <button onClick={printPlan} className="p-2 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }} title="Print">
                 <Download className="w-5 h-5" />
               </button>
-              <button onClick={clearData} className="p-2 hover:bg-blue-800 rounded" title="Clear All">
+              <button onClick={clearData} className="p-2 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }} title="Clear All">
                 <Trash2 className="w-5 h-5" />
               </button>
             </div>
@@ -752,7 +849,7 @@ const CourseCard = ({ course, completedCourses, toggleCompleted, setGrade, remov
                 <option value="C-">C-</option>
                 <option value="D+">D+</option>
                 <option value="D">D</option>
-                  <option value="D-">D-</option>
+                <option value="D-">D-</option>
                 <option value="F">F</option>
               </select>
             </div>
