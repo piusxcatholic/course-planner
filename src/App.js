@@ -1,31 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, Download, Mail, Trash2, ChevronDown, Check, X, ArrowLeft, ArrowRight } from 'lucide-react';
+import { GraduationCap, Download, Mail, Trash2, ChevronDown, X, ArrowLeft, ArrowRight, AlertCircle } from 'lucide-react';
 
 const CoursePlanner = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [selectedCourses, setSelectedCourses] = useState([]);
-  const [completedCourses, setCompletedCourses] = useState({});
   const [showWelcome, setShowWelcome] = useState(true);
   const [welcomeStep, setWelcomeStep] = useState(1);
   const [userPreferences, setUserPreferences] = useState({ 
     firstName: '',
     gender: '',
+    studyHall: '',
     band: false, 
     choir: false,
     mathClass: '',
+    algebraEssentials: null,
     verifiedAlgebra: null,
     verifiedGeometry: null
   });
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [pendingCourse, setPendingCourse] = useState(null);
   const [expandedDepts, setExpandedDepts] = useState({});
+  const [hoveredCourse, setHoveredCourse] = useState(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('piusx-planner');
     if (saved) {
       const data = JSON.parse(saved);
       setSelectedCourses(data.selectedCourses || []);
-      setCompletedCourses(data.completedCourses || {});
       setShowWelcome(false);
     }
   }, []);
@@ -33,11 +34,10 @@ const CoursePlanner = () => {
   useEffect(() => {
     if (!showWelcome) {
       localStorage.setItem('piusx-planner', JSON.stringify({
-        selectedCourses,
-        completedCourses
+        selectedCourses
       }));
     }
-  }, [selectedCourses, completedCourses, showWelcome]);
+  }, [selectedCourses, showWelcome]);
 
   const requirements = {
     'Theology': 40,
@@ -80,6 +80,7 @@ const CoursePlanner = () => {
     ],
     'Math': [
       { name: 'Algebra I', credits: 10, year: [9, 10] },
+      { name: 'Algebra Essentials', credits: 10, year: 9 },
       { name: 'Differentiated Algebra I', credits: 10, year: [9, 10, 11, 12] },
       { name: 'Geometry', credits: 10, year: [10, 11, 12] },
       { name: 'Differentiated Geometry', credits: 10, year: [9, 10, 11, 12] },
@@ -114,54 +115,75 @@ const CoursePlanner = () => {
     'Life Skills': [
       { name: 'Computer Applications', credits: 5, year: [9, 10, 11, 12], semester: true },
       { name: 'Career and Life Management', credits: 5, year: [9, 10], semester: true }
+    ],
+    'Other': [
+      { name: 'Study Hall', credits: 0, year: [9, 10, 11, 12] }
     ]
   };
 
   const handleWelcomeSubmit = () => {
-    const { band, choir, mathClass, gender } = userPreferences;
+    const { band, choir, mathClass, gender, studyHall, algebraEssentials } = userPreferences;
+    
+    // Add required courses
+    addCourse('Theology I', 'Theology', 9);
+    addCourse('Theology II', 'Theology', 10);
+    addCourse('Theology III', 'Theology', 11);
+    addCourse('Theology IV', 'Theology', 12);
+    
+    addCourse('English I', 'English', 9);
+    addCourse('English II', 'English', 10);
+    
+    // Add PE based on gender
+    const peCourse = gender === 'female' ? 'Girls Physical Education & Health' : 'Boys Physical Education & Health';
+    addCourse(peCourse, 'P.E.', 9);
+    
+    // Add Study Hall if requested
+    if (studyHall === 'one') {
+      addCourse('Study Hall', 'Other', 9);
+    } else if (studyHall === 'both') {
+      addCourse('Study Hall', 'Other', 9);
+      addCourse('Study Hall', 'Other', 9);
+    }
     
     if (band) {
-      addCourse('Marching Band', 'Fine Arts', 9, 'Fall');
-      addCourse('Concert Band', 'Fine Arts', 9, 'Spring');
+      addCourse('Marching Band', 'Fine Arts', 9);
+      addCourse('Concert Band', 'Fine Arts', 9);
     }
     
     if (choir) {
       const choirCourse = gender === 'female' ? "Women's Choir" : "Men's Choir";
-      addCourse(choirCourse, 'Fine Arts', 9, 'Fall');
-      addCourse(choirCourse, 'Fine Arts', 9, 'Spring');
+      addCourse(choirCourse, 'Fine Arts', 9);
     }
     
     if (mathClass) {
-      addCourse(mathClass, 'Math', 9, 'Fall');
-      addCourse(mathClass, 'Math', 9, 'Spring');
+      addCourse(mathClass, 'Math', 9);
+      
+      if (algebraEssentials) {
+        addCourse('Algebra Essentials', 'Math', 9);
+      }
       
       if (mathClass === 'Algebra I') {
-        addCourse('Geometry', 'Math', 10, 'Fall');
-        addCourse('Geometry', 'Math', 10, 'Spring');
-        addCourse('Algebra II', 'Math', 11, 'Fall');
-        addCourse('Algebra II', 'Math', 11, 'Spring');
+        addCourse('Geometry', 'Math', 10);
+        addCourse('Algebra II', 'Math', 11);
       } else if (mathClass === 'Differentiated Algebra I') {
-        addCourse('Differentiated Geometry', 'Math', 10, 'Fall');
-        addCourse('Differentiated Geometry', 'Math', 10, 'Spring');
-        addCourse('Differentiated Algebra II', 'Math', 11, 'Fall');
-        addCourse('Differentiated Algebra II', 'Math', 11, 'Spring');
+        addCourse('Differentiated Geometry', 'Math', 10);
+        addCourse('Differentiated Algebra II', 'Math', 11);
       } else if (mathClass === 'Differentiated Geometry') {
-        addCourse('Differentiated Algebra II', 'Math', 10, 'Fall');
-        addCourse('Differentiated Algebra II', 'Math', 10, 'Spring');
+        addCourse('Differentiated Algebra II', 'Math', 10);
       }
     }
     
     setShowWelcome(false);
   };
 
-  const addCourse = (courseName, dept, year, semester) => {
-    const id = `${courseName}-${year}-${semester}`;
-    setSelectedCourses(prev => {
-      if (!prev.find(c => c.id === id)) {
-        return [...prev, { name: courseName, dept, year, semester, id }];
-      }
-      return prev;
-    });
+  const addCourse = (courseName, dept, year) => {
+    const id = `${courseName}-${year}-${Date.now()}-${Math.random()}`;
+    setSelectedCourses(prev => [...prev, { 
+      name: courseName, 
+      dept, 
+      year,
+      id 
+    }]);
   };
 
   const handleCourseClick = (courseName, dept) => {
@@ -169,14 +191,9 @@ const CoursePlanner = () => {
     setShowCourseModal(true);
   };
 
-  const handleAddCourseWithDetails = (year, semester) => {
+  const handleAddCourseWithDetails = (year) => {
     if (pendingCourse) {
-      if (semester === 'Both') {
-        addCourse(pendingCourse.name, pendingCourse.dept, year, 'Fall');
-        addCourse(pendingCourse.name, pendingCourse.dept, year, 'Spring');
-      } else {
-        addCourse(pendingCourse.name, pendingCourse.dept, year, semester);
-      }
+      addCourse(pendingCourse.name, pendingCourse.dept, year);
       setShowCourseModal(false);
       setPendingCourse(null);
     }
@@ -184,19 +201,6 @@ const CoursePlanner = () => {
 
   const removeCourse = (id) => {
     setSelectedCourses(selectedCourses.filter(c => c.id !== id));
-    const newCompleted = { ...completedCourses };
-    delete newCompleted[id];
-    setCompletedCourses(newCompleted);
-  };
-
-  const toggleCompleted = (id) => {
-    if (completedCourses[id]) {
-      const newCompleted = { ...completedCourses };
-      delete newCompleted[id];
-      setCompletedCourses(newCompleted);
-    } else {
-      setCompletedCourses({ ...completedCourses, [id]: { completed: true } });
-    }
   };
 
   const calculateCredits = () => {
@@ -205,7 +209,7 @@ const CoursePlanner = () => {
 
     selectedCourses.forEach(selected => {
       const course = Object.values(courses).flat().find(c => c.name === selected.name);
-      if (course && completedCourses[selected.id]) {
+      if (course) {
         totals[selected.dept] = (totals[selected.dept] || 0) + course.credits;
       }
     });
@@ -217,7 +221,7 @@ const CoursePlanner = () => {
     let total = 0;
     selectedCourses.forEach(selected => {
       const course = Object.values(courses).flat().find(c => c.name === selected.name && c.ap);
-      if (course && completedCourses[selected.id]) {
+      if (course) {
         if (course.name.includes('PACE')) total += 8;
         else total += 3;
       }
@@ -229,18 +233,26 @@ const CoursePlanner = () => {
     let total = 0;
     selectedCourses.forEach(selected => {
       const course = Object.values(courses).flat().find(c => c.name === selected.name && c.dual);
-      if (course && completedCourses[selected.id]) {
+      if (course) {
         total += course.dual;
       }
     });
     return total;
   };
 
+  const getYearCredits = (year) => {
+    return selectedCourses
+      .filter(c => c.year === year)
+      .reduce((sum, selected) => {
+        const course = Object.values(courses).flat().find(c => c.name === selected.name);
+        return sum + (course ? course.credits : 0);
+      }, 0);
+  };
+
   const clearData = () => {
     if (window.confirm('Are you sure you want to clear all data and start over?')) {
       localStorage.removeItem('piusx-planner');
       setSelectedCourses([]);
-      setCompletedCourses([]);
       setShowWelcome(true);
       setWelcomeStep(1);
     }
@@ -256,19 +268,13 @@ const CoursePlanner = () => {
       body += `${dept}: ${credits[dept] || 0}/${req}\n`;
     });
     body += '\n\nSELECTED COURSES:\n';
-    ['Freshman', 'Sophomore', 'Junior', 'Senior'].forEach((year, idx) => {
-      const yearCourses = selectedCourses.filter(c => c.year === idx + 9);
+    ['Freshman', 'Sophomore', 'Junior', 'Senior'].forEach((yearName, idx) => {
+      const year = idx + 9;
+      const yearCourses = selectedCourses.filter(c => c.year === year);
       if (yearCourses.length > 0) {
-        body += `\n${year.toUpperCase()}:\n`;
-        ['Fall', 'Spring'].forEach(sem => {
-          const semCourses = yearCourses.filter(c => c.semester === sem);
-          if (semCourses.length > 0) {
-            body += `  ${sem}:\n`;
-            semCourses.forEach(c => {
-              const status = completedCourses[c.id] ? '✓' : '○';
-              body += `    ${status} ${c.name}\n`;
-            });
-          }
+        body += `\n${yearName.toUpperCase()} (${getYearCredits(year)} credits):\n`;
+        yearCourses.forEach(c => {
+          body += `  ${c.name}\n`;
         });
       }
     });
@@ -338,28 +344,27 @@ const CoursePlanner = () => {
 
           {welcomeStep === 2 && (
             <div className="space-y-6">
-              <div className="border-2 border-gray-200 rounded-lg p-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={userPreferences.band}
-                    onChange={(e) => setUserPreferences({ ...userPreferences, band: e.target.checked })}
-                    className="w-5 h-5 text-blue-900 rounded"
-                  />
-                  <span className="ml-3 text-lg">Are you in Band?</span>
-                </label>
-              </div>
-
-              <div className="border-2 border-gray-200 rounded-lg p-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={userPreferences.choir}
-                    onChange={(e) => setUserPreferences({ ...userPreferences, choir: e.target.checked })}
-                    className="w-5 h-5 text-blue-900 rounded"
-                  />
-                  <span className="ml-3 text-lg">Are you in Choir?</span>
-                </label>
+              <div>
+                <label className="block text-lg font-semibold mb-3">Would you like a Study Hall during your freshman year?</label>
+                <div className="space-y-2">
+                  {[
+                    { value: 'none', label: 'No Study Hall' },
+                    { value: 'one', label: 'One Semester' },
+                    { value: 'both', label: 'Both Semesters' }
+                  ].map(option => (
+                    <button
+                      key={option.value}
+                      onClick={() => setUserPreferences({ ...userPreferences, studyHall: option.value })}
+                      className={`w-full p-3 rounded-lg border-2 text-left transition ${
+                        userPreferences.studyHall === option.value
+                          ? 'border-blue-900 bg-blue-50'
+                          : 'border-gray-200 hover:border-blue-300'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="flex space-x-2">
@@ -372,7 +377,8 @@ const CoursePlanner = () => {
                 </button>
                 <button
                   onClick={() => setWelcomeStep(3)}
-                  className="flex-1 bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition flex items-center justify-center"
+                  disabled={!userPreferences.studyHall}
+                  className="flex-1 bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
                 >
                   Next
                   <ArrowRight className="ml-2 w-5 h-5" />
@@ -407,17 +413,26 @@ const CoursePlanner = () => {
                 </label>
               </div>
 
-              <button
-                onClick={() => setWelcomeStep(2)}
-                className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition flex items-center justify-center"
-              >
-                Next
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </button>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setWelcomeStep(2)}
+                  className="flex-1 border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center"
+                >
+                  <ArrowLeft className="mr-2 w-5 h-5" />
+                  Back
+                </button>
+                <button
+                  onClick={() => setWelcomeStep(4)}
+                  className="flex-1 bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition flex items-center justify-center"
+                >
+                  Next
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </button>
+              </div>
             </div>
           )}
 
-          {welcomeStep === 3 && (
+          {welcomeStep === 4 && (
             <div className="space-y-6">
               <div>
                 <label className="block text-lg font-semibold mb-3">What math class will you start with as a freshman?</label>
@@ -440,7 +455,7 @@ const CoursePlanner = () => {
 
               <div className="flex space-x-2">
                 <button
-                  onClick={() => setWelcomeStep(2)}
+                  onClick={() => setWelcomeStep(3)}
                   className="flex-1 border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center"
                 >
                   <ArrowLeft className="mr-2 w-5 h-5" />
@@ -448,10 +463,12 @@ const CoursePlanner = () => {
                 </button>
                 <button
                   onClick={() => {
-                    if (userPreferences.mathClass === 'Differentiated Geometry') {
-                      setWelcomeStep(4);
-                    } else if (userPreferences.mathClass === 'Differentiated Algebra II') {
+                    if (userPreferences.mathClass === 'Algebra I') {
                       setWelcomeStep(5);
+                    } else if (userPreferences.mathClass === 'Differentiated Geometry') {
+                      setWelcomeStep(6);
+                    } else if (userPreferences.mathClass === 'Differentiated Algebra II') {
+                      setWelcomeStep(7);
                     } else {
                       handleWelcomeSubmit();
                     }
@@ -466,7 +483,47 @@ const CoursePlanner = () => {
             </div>
           )}
 
-          {welcomeStep === 4 && (
+          {welcomeStep === 5 && (
+            <div className="space-y-6">
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+                <p className="text-sm mb-3">
+                  <strong>Algebra Essentials</strong> is designed to be taken along with Algebra I. It will cover basic skills required to be successful in all high school math courses, along with providing extra practice of skills learned in Algebra I. Topics covered will include fractions, operations with integers, simplifying algebraic expressions, solving basic equations and inequalities, graphing, decimals, percentages, probability, measurement, radicals, and basic geometry. All work is designed to be completed in class.
+                </p>
+                <p className="text-lg font-semibold">Would you like to add Algebra Essentials to your freshman year?</p>
+              </div>
+              
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    setUserPreferences({ ...userPreferences, algebraEssentials: true });
+                    handleWelcomeSubmit();
+                  }}
+                  className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+                >
+                  Yes, Add Algebra Essentials
+                </button>
+                <button
+                  onClick={() => {
+                    setUserPreferences({ ...userPreferences, algebraEssentials: false });
+                    handleWelcomeSubmit();
+                  }}
+                  className="w-full bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition"
+                >
+                  No, Just Algebra I
+                </button>
+              </div>
+
+              <button
+                onClick={() => setWelcomeStep(4)}
+                className="w-full border-2 border-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center"
+              >
+                <ArrowLeft className="mr-2 w-5 h-5" />
+                Back
+              </button>
+            </div>
+          )}
+
+          {welcomeStep === 6 && (
             <div className="space-y-6">
               <p className="text-lg">Have you completed or will you complete Algebra I in 7th grade?</p>
               
@@ -483,7 +540,7 @@ const CoursePlanner = () => {
                 <button
                   onClick={() => {
                     setUserPreferences({ ...userPreferences, mathClass: '', verifiedAlgebra: false });
-                    setWelcomeStep(2);
+                    setWelcomeStep(4);
                   }}
                   className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition"
                 >
@@ -492,7 +549,7 @@ const CoursePlanner = () => {
               </div>
 
               <button
-                onClick={() => setWelcomeStep(2)}
+                onClick={() => setWelcomeStep(4)}
                 className="w-full border-2 border-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center"
               >
                 <ArrowLeft className="mr-2 w-5 h-5" />
@@ -501,7 +558,7 @@ const CoursePlanner = () => {
             </div>
           )}
 
-          {welcomeStep === 5 && (
+          {welcomeStep === 7 && (
             <div className="space-y-6">
               <p className="text-lg">Have you completed or will you complete Differentiated Geometry as an 8th grader at Pius X?</p>
               
@@ -518,7 +575,7 @@ const CoursePlanner = () => {
                 <button
                   onClick={() => {
                     setUserPreferences({ ...userPreferences, mathClass: '', verifiedGeometry: false });
-                    setWelcomeStep(3);
+                    setWelcomeStep(4);
                   }}
                   className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition"
                 >
@@ -527,7 +584,7 @@ const CoursePlanner = () => {
               </div>
 
               <button
-                onClick={() => setWelcomeStep(3)}
+                onClick={() => setWelcomeStep(4)}
                 className="w-full border-2 border-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center"
               >
                 <ArrowLeft className="mr-2 w-5 h-5" />
@@ -577,259 +634,3 @@ const CoursePlanner = () => {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-6 py-3 font-semibold capitalize ${
-                  activeTab === tab
-                    ? 'border-b-4 border-blue-900 text-blue-900'
-                    : 'text-gray-600 hover:text-blue-900'
-                }`}
-              >
-                {tab === 'all' ? 'All Grades' : tab}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-1 print:hidden">
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-blue-900 mb-6">Available Courses</h2>
-              
-              <div className="space-y-4">
-                {Object.entries(courses).map(([dept, courseList]) => (
-                  <div key={dept} className="border rounded-lg overflow-hidden">
-                    <button
-                      onClick={() => setExpandedDepts({ ...expandedDepts, [dept]: !expandedDepts[dept] })}
-                      className="w-full px-4 py-3 bg-blue-50 hover:bg-blue-100 flex justify-between items-center"
-                    >
-                      <span className="font-semibold text-blue-900">{dept}</span>
-                      <ChevronDown className={`w-5 h-5 transition-transform ${expandedDepts[dept] ? 'rotate-180' : ''}`} />
-                    </button>
-                    
-                    {expandedDepts[dept] && (
-                      <div className="p-4 space-y-2">
-                        {courseList.map(course => (
-                          <button
-                            key={course.name}
-                            onClick={() => handleCourseClick(course.name, dept)}
-                            className="w-full text-left px-4 py-2 rounded hover:bg-blue-50 border border-gray-200 flex justify-between items-center"
-                          >
-                            <div>
-                              <span>{course.name}</span>
-                              {course.ap && <span className="ml-2 text-xs bg-purple-600 text-white px-2 py-1 rounded">AP</span>}
-                              {course.dual && <span className="ml-2 text-xs bg-green-600 text-white px-2 py-1 rounded">Dual</span>}
-                            </div>
-                            <span className="text-sm text-gray-600">{course.credits} cr</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h3 className="text-xl font-bold text-blue-900 mb-4">Your Selected Courses</h3>
-              
-              {activeTab === 'all' ? (
-                ['Freshman', 'Sophomore', 'Junior', 'Senior'].map((yearName, idx) => {
-                  const year = idx + 9;
-                  const yearCourses = getYearCourses(year);
-                  if (yearCourses.length === 0) return null;
-                  
-                  return (
-                    <div key={yearName} className="mb-6">
-                      <h4 className="font-semibold text-lg mb-3">{yearName}</h4>
-                      {['Fall', 'Spring'].map(semester => {
-                        const semCourses = yearCourses.filter(c => c.semester === semester);
-                        if (semCourses.length === 0) return null;
-                        
-                        return (
-                          <div key={semester} className="mb-4">
-                            <div className="text-sm font-semibold text-gray-600 mb-2">{semester}</div>
-                            <div className="space-y-2">
-                              {semCourses.map(course => (
-                                <CourseCard
-                                  key={course.id}
-                                  course={course}
-                                  completedCourses={completedCourses}
-                                  toggleCompleted={toggleCompleted}
-                                  removeCourse={removeCourse}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })
-              ) : (
-                (() => {
-                  const yearMap = { 'freshman': 9, 'sophomore': 10, 'junior': 11, 'senior': 12 };
-                  const year = yearMap[activeTab];
-                  const yearCourses = getYearCourses(year);
-                  
-                  return ['Fall', 'Spring'].map(semester => {
-                    const semCourses = yearCourses.filter(c => c.semester === semester);
-                    if (semCourses.length === 0) return null;
-                    
-                    return (
-                      <div key={semester} className="mb-4">
-                        <div className="text-sm font-semibold text-gray-600 mb-2">{semester}</div>
-                        <div className="space-y-2">
-                          {semCourses.map(course => (
-                            <CourseCard
-                              key={course.id}
-                              course={course}
-                              completedCourses={completedCourses}
-                              toggleCompleted={toggleCompleted}
-                              removeCourse={removeCourse}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  });
-                })()
-              )}
-              
-              {selectedCourses.length === 0 && (
-                <p className="text-gray-500 text-center py-8">No courses selected yet. Click on courses to add them.</p>
-              )}
-            </div>
-          </div>
-
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-4">
-              <h2 className="text-2xl font-bold text-blue-900 mb-4">Summary</h2>
-
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="text-center p-3 bg-purple-50 rounded">
-                  <div className="text-2xl font-bold text-purple-900">{calculateAPCredits()}</div>
-                  <div className="text-xs text-gray-600">AP Credits</div>
-                </div>
-                <div className="text-center p-3 bg-green-50 rounded">
-                  <div className="text-2xl font-bold text-green-900">{calculateDualCredits()}</div>
-                  <div className="text-xs text-gray-600">Dual Credits</div>
-                </div>
-              </div>
-
-              <h3 className="font-semibold mb-3">Requirements Progress</h3>
-              <div className="space-y-3">
-                {Object.entries(requirements).map(([dept, required]) => {
-                  const earned = credits[dept] || 0;
-                  const percentage = (earned / required) * 100;
-                  return (
-                    <div key={dept}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>{dept}</span>
-                        <span className={earned >= required ? 'text-green-600 font-semibold' : ''}>
-                          {earned}/{required}
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${earned >= required ? 'bg-green-600' : 'bg-blue-600'}`}
-                          style={{ width: `${Math.min(percentage, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {showCourseModal && pendingCourse && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold mb-4">Add {pendingCourse.name}</h3>
-            <p className="text-gray-600 mb-4">When do you want to take this course?</p>
-            
-            <div className="space-y-3">
-              {[
-                { year: 9, label: 'Freshman' },
-                { year: 10, label: 'Sophomore' },
-                { year: 11, label: 'Junior' },
-                { year: 12, label: 'Senior' }
-              ].map(({ year, label }) => (
-                <div key={year}>
-                  <div className="font-semibold mb-2">{label}</div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      onClick={() => handleAddCourseWithDetails(year, 'Fall')}
-                      className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800 text-sm"
-                    >
-                      Fall
-                    </button>
-                    <button
-                      onClick={() => handleAddCourseWithDetails(year, 'Spring')}
-                      className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800 text-sm"
-                    >
-                      Spring
-                    </button>
-                    <button
-                      onClick={() => handleAddCourseWithDetails(year, 'Both')}
-                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-                    >
-                      Both
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => {
-                setShowCourseModal(false);
-                setPendingCourse(null);
-              }}
-              className="w-full mt-4 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const CourseCard = ({ course, completedCourses, toggleCompleted, removeCourse }) => {
-  const isCompleted = completedCourses[course.id];
-  
-  return (
-    <div className="border rounded p-3">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => toggleCompleted(course.id)}
-              className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
-                isCompleted ? 'bg-green-600 border-green-600' : 'border-gray-300'
-              }`}
-            >
-              {isCompleted && <Check className="w-4 h-4 text-white" />}
-            </button>
-            <span className="font-medium">{course.name}</span>
-          </div>
-        </div>
-        
-        <button
-          onClick={() => removeCourse(course.id)}
-          className="text-red-600 hover:text-red-800"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-    </div>
-  );
-};
-
-export default CoursePlanner;
