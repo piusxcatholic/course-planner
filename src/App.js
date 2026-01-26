@@ -629,8 +629,258 @@ const CoursePlanner = () => {
       <div className="bg-white border-b print:hidden">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex space-x-1">
-            {['all', 'freshman', 'sophomore', 'junior', 'senior'].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-6 py-3 font-semibold capitalize ${
+            {['all', 'freshman', 'sophomore', 'junior', 'senior'].map(tab => {
+              const isActive = activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-6 py-3 font-semibold capitalize ${
+                    isActive
+                      ? 'border-b-4 text-green-800'
+                      : 'text-gray-600 hover:text-green-800'
+                  }`}
+                  style={isActive ? { borderColor: '#046a38', color: '#046a38' } : {}}
+                >
+                  {tab === 'all' ? 'All Grades' : tab}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-1 print:hidden">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-2xl font-bold mb-6" style={{ color: '#046a38' }}>Available Courses</h2>
+              
+              <div className="space-y-4">
+                {Object.entries(courses).filter(([dept]) => dept !== 'Other').map(([dept, courseList]) => (
+                  <div key={dept} className="border rounded-lg overflow-hidden">
+                    <button
+                      onClick={() => setExpandedDepts({ ...expandedDepts, [dept]: !expandedDepts[dept] })}
+                      className="w-full px-4 py-3 hover:bg-gray-50 flex justify-between items-center"
+                      style={{ backgroundColor: '#f0fdf4' }}
+                    >
+                      <span className="font-semibold" style={{ color: '#046a38' }}>{dept}</span>
+                      <ChevronDown className={`w-5 h-5 transition-transform ${expandedDepts[dept] ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {expandedDepts[dept] && (
+                      <div className="p-4 space-y-2">
+                        {courseList.map(course => (
+                          <button
+                            key={course.name}
+                            onClick={() => handleCourseClick(course.name, dept)}
+                            className="w-full text-left px-4 py-2 rounded hover:bg-green-50 border border-gray-200 flex justify-between items-center"
+                          >
+                            <div>
+                              <span>{course.name}</span>
+                              {course.ap && <span className="ml-2 text-xs bg-purple-600 text-white px-2 py-1 rounded">AP</span>}
+                              {course.dual && <span className="ml-2 text-xs bg-green-600 text-white px-2 py-1 rounded">Dual</span>}
+                            </div>
+                            <span className="text-sm text-gray-600">{course.credits} cr</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h3 className="text-xl font-bold mb-4" style={{ color: '#046a38' }}>Your Selected Courses</h3>
+              
+              {activeTab === 'all' ? (
+                ['Freshman', 'Sophomore', 'Junior', 'Senior'].map((yearName, idx) => {
+                  const year = idx + 9;
+                  const yearCourses = getYearCourses(year);
+                  const yearCredits = getYearCredits(year);
+                  if (yearCourses.length === 0) return null;
+                  
+                  return (
+                    <div key={yearName} className="mb-6">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-lg">{yearName}</h4>
+                        <span className="text-sm text-gray-600">{yearCredits} credits</span>
+                      </div>
+                      {yearCredits > 80 && (
+                        <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded flex items-start">
+                          <AlertCircle className="w-5 h-5 text-yellow-600 mr-2 flex-shrink-0 mt-0.5" />
+                          <p className="text-sm text-yellow-800">
+                            You have more than 80 credits scheduled for this year. Please review your course load.
+                          </p>
+                        </div>
+                      )}
+                      <div className="space-y-2">
+                        {yearCourses.map(course => (
+                          <CourseCard
+                            key={course.id}
+                            course={course}
+                            removeCourse={removeCourse}
+                            hoveredCourse={hoveredCourse}
+                            setHoveredCourse={setHoveredCourse}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                (() => {
+                  const yearMap = { 'freshman': 9, 'sophomore': 10, 'junior': 11, 'senior': 12 };
+                  const year = yearMap[activeTab];
+                  const yearCourses = getYearCourses(year);
+                  const yearCredits = getYearCredits(year);
+                  
+                  return (
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-lg capitalize">{activeTab}</h4>
+                        <span className="text-sm text-gray-600">{yearCredits} credits</span>
+                      </div>
+                      {yearCredits > 80 && (
+                        <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded flex items-start">
+                          <AlertCircle className="w-5 h-5 text-yellow-600 mr-2 flex-shrink-0 mt-0.5" />
+                          <p className="text-sm text-yellow-800">
+                            You have more than 80 credits scheduled for this year. Please review your course load.
+                          </p>
+                        </div>
+                      )}
+                      <div className="space-y-2">
+                        {yearCourses.map(course => (
+                          <CourseCard
+                            key={course.id}
+                            course={course}
+                            removeCourse={removeCourse}
+                            hoveredCourse={hoveredCourse}
+                            setHoveredCourse={setHoveredCourse}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()
+              )}
+              
+              {selectedCourses.length === 0 && (
+                <p className="text-gray-500 text-center py-8">No courses selected yet. Click on courses to add them.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-4">
+              <h2 className="text-2xl font-bold mb-4" style={{ color: '#046a38' }}>Summary</h2>
+
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="text-center p-3 bg-purple-50 rounded">
+                  <div className="text-2xl font-bold text-purple-900">{calculateAPCredits()}</div>
+                  <div className="text-xs text-gray-600">AP Credits</div>
+                </div>
+                <div className="text-center p-3 bg-green-50 rounded">
+                  <div className="text-2xl font-bold text-green-900">{calculateDualCredits()}</div>
+                  <div className="text-xs text-gray-600">Dual Credits</div>
+                </div>
+              </div>
+
+              <h3 className="font-semibold mb-3">Requirements Progress</h3>
+              <div className="space-y-3">
+                {Object.entries(requirements).map(([dept, required]) => {
+                  const earned = credits[dept] || 0;
+                  const percentage = (earned / required) * 100;
+                  return (
+                    <div key={dept}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>{dept}</span>
+                        <span className={earned >= required ? 'text-green-600 font-semibold' : ''}>
+                          {earned}/{required}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full ${earned >= required ? 'bg-green-600' : 'bg-blue-600'}`}
+                          style={{ 
+                            width: `${Math.min(percentage, 100)}%`,
+                            backgroundColor: earned >= required ? '#16a34a' : '#046a38'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {showCourseModal && pendingCourse && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">Add {pendingCourse.name}</h3>
+            <p className="text-gray-600 mb-4">Which year do you want to take this course?</p>
+            
+            <div className="space-y-2">
+              {[
+                { year: 9, label: 'Freshman' },
+                { year: 10, label: 'Sophomore' },
+                { year: 11, label: 'Junior' },
+                { year: 12, label: 'Senior' }
+              ].map(({ year, label }) => (
+                <button
+                  key={year}
+                  onClick={() => handleAddCourseWithDetails(year)}
+                  className="w-full px-4 py-3 text-white rounded hover:opacity-90 text-left font-semibold"
+                  style={{ backgroundColor: '#046a38' }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => {
+                setShowCourseModal(false);
+                setPendingCourse(null);
+              }}
+              className="w-full mt-4 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const CourseCard = ({ course, removeCourse, hoveredCourse, setHoveredCourse }) => {
+  return (
+    <div 
+      className="border rounded p-3 relative"
+      onMouseEnter={() => setHoveredCourse(course.id)}
+      onMouseLeave={() => setHoveredCourse(null)}
+    >
+      <div className="flex items-center justify-between">
+        <span className="font-medium">{course.name}</span>
+        
+        {hoveredCourse === course.id && (
+          <button
+            onClick={() => removeCourse(course.id)}
+            className="text-red-600 hover:text-red-800 absolute right-3"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CoursePlanner;
