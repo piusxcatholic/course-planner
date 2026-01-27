@@ -440,26 +440,31 @@ const CoursePlanner = () => {
 
   if (showWelcome) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-700 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(to bottom right, #046a38, #034a28)' }}>
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full">
           <div className="flex items-center justify-center mb-6">
-            <GraduationCap className="w-16 h-16 text-blue-900" />
+            <img 
+              src="https://www.piusx.net/wp-content/uploads/2018/06/P-green-256x300.jpg" 
+              alt="Pius X Logo" 
+              className="w-24 h-auto"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-center text-blue-900 mb-2">Pius X Course Planner</h1>
+          <h1 className="text-3xl font-bold text-center mb-2" style={{ color: '#046a38' }}>Pius X Course Planner</h1>
           <p className="text-gray-600 text-center mb-8">Plan your four-year journey</p>
           
           {welcomeStep === 0 && (
             <div className="space-y-4">
               <button
                 onClick={() => setWelcomeStep(1)}
-                className="w-full p-6 border-2 border-blue-900 rounded-lg hover:bg-blue-50 transition text-left"
+                className="w-full p-6 border-2 rounded-lg hover:bg-green-50 transition text-left"
+                style={{ borderColor: '#046a38' }}
               >
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-12 h-12 bg-blue-900 text-white rounded-full flex items-center justify-center font-bold text-xl mr-4">
+                  <div className="flex-shrink-0 w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-xl mr-4" style={{ backgroundColor: '#046a38' }}>
                     1
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-blue-900 mb-1">Start-Up Guide</h3>
+                    <h3 className="font-bold text-lg mb-1" style={{ color: '#046a38' }}>Start-Up Guide</h3>
                     <p className="text-sm text-gray-600">Answer a few questions and we'll help auto-pick your courses based on your interests</p>
                   </div>
                 </div>
@@ -470,14 +475,15 @@ const CoursePlanner = () => {
                   setShowWelcome(false);
                   setWelcomeStep(1);
                 }}
-                className="w-full p-6 border-2 border-blue-900 rounded-lg hover:bg-blue-50 transition text-left"
+                className="w-full p-6 border-2 rounded-lg hover:bg-green-50 transition text-left"
+                style={{ borderColor: '#046a38' }}
               >
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-12 h-12 bg-blue-900 text-white rounded-full flex items-center justify-center font-bold text-xl mr-4">
+                  <div className="flex-shrink-0 w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-xl mr-4" style={{ backgroundColor: '#046a38' }}>
                     2
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-blue-900 mb-1">Go Straight to Schedule</h3>
+                    <h3 className="font-bold text-lg mb-1" style={{ color: '#046a38' }}>Go Straight to Schedule</h3>
                     <p className="text-sm text-gray-600">Already know what courses you want? Build your schedule from scratch</p>
                   </div>
                 </div>
@@ -507,9 +513,10 @@ const CoursePlanner = () => {
                       onClick={() => setUserPreferences({ ...userPreferences, gender: gender.toLowerCase() })}
                       className={`w-full p-3 rounded-lg border-2 text-left transition ${
                         userPreferences.gender === gender.toLowerCase()
-                          ? 'border-blue-900 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300'
+                          ? 'bg-green-50'
+                          : 'border-gray-200 hover:border-green-300'
                       }`}
+                      style={userPreferences.gender === gender.toLowerCase() ? { borderColor: '#046a38' } : {}}
                     >
                       {gender}
                     </button>
@@ -520,7 +527,8 @@ const CoursePlanner = () => {
               <button
                 onClick={() => setWelcomeStep(2)}
                 disabled={!userPreferences.firstName || !userPreferences.gender}
-                className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
+                className="w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
+                style={{ backgroundColor: '#046a38' }}
               >
                 Next
                 <ArrowRight className="ml-2 w-5 h-5" />
@@ -543,9 +551,10 @@ const CoursePlanner = () => {
                       onClick={() => setUserPreferences({ ...userPreferences, studyHall: option.value })}
                       className={`w-full p-3 rounded-lg border-2 text-left transition ${
                         userPreferences.studyHall === option.value
-                          ? 'border-blue-900 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300'
+                          ? 'bg-green-50'
+                          : 'border-gray-200 hover:border-green-300'
                       }`}
+                      style={userPreferences.studyHall === option.value ? { borderColor: '#046a38' } : {}}
                     >
                       {option.label}
                     </button>
@@ -564,7 +573,8 @@ const CoursePlanner = () => {
                 <button
                   onClick={() => setWelcomeStep(3)}
                   disabled={!userPreferences.studyHall}
-                  className="flex-1 bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="flex-1 text-white py-3 rounded-lg font-semibold hover:opacity-90 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
+                  style={{ backgroundColor: '#046a38' }}
                 >
                   Next
                   <ArrowRight className="ml-2 w-5 h-5" />
