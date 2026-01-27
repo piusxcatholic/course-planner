@@ -67,7 +67,10 @@ const CoursePlanner = () => {
       { name: 'Creative Writing', credits: 5, year: [11, 12], semester: true },
       { name: 'Classic Literature I', credits: 10, year: [11, 12], dual: 6 },
       { name: 'Classic Literature II', credits: 10, year: 12, dual: 6 },
-      { name: 'AP English Literature', credits: 10, year: 12, ap: true, dual: 6 }
+      { name: 'AP English Literature', credits: 10, year: 12, ap: true, dual: 6 },
+      { name: 'Journalism I', credits: 10, year: [9, 10, 11, 12] },
+      { name: 'Journalism II', credits: 10, year: [10, 11, 12] },
+      { name: 'Yearbook', credits: 10, year: [10, 11, 12] }
     ],
     'Social Studies': [
       { name: 'World Geography', credits: 5, year: 9, required: true, semester: true },
@@ -76,7 +79,12 @@ const CoursePlanner = () => {
       { name: 'American Government', credits: 5, year: 12, required: true, semester: true },
       { name: 'AP American Government', credits: 5, year: 12, semester: true, ap: true },
       { name: 'AP Human Geography', credits: 10, year: [10, 11, 12], ap: true },
-      { name: 'Psychology', credits: 5, year: 12, semester: true }
+      { name: 'Psychology', credits: 5, year: 12, semester: true },
+      { name: 'Contemporary History', credits: 5, year: 12, semester: true },
+      { name: 'Introduction to Philosophy', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Economics', credits: 5, year: 12, semester: true },
+      { name: 'Human Relations', credits: 5, year: [11, 12], semester: true },
+      { name: 'Family Issues', credits: 5, year: [11, 12], semester: true }
     ],
     'Math': [
       { name: 'Algebra I', credits: 10, year: [9, 10] },
@@ -87,37 +95,112 @@ const CoursePlanner = () => {
       { name: 'Algebra II', credits: 10, year: [11, 12] },
       { name: 'Differentiated Algebra II', credits: 10, year: [10, 11, 12] },
       { name: 'Pre-Calculus', credits: 10, year: [11, 12] },
+      { name: 'AP Pre-Calculus', credits: 10, year: [11, 12], ap: true },
       { name: 'AP Calculus', credits: 10, year: 12, ap: true, dual: 8 },
       { name: 'AP Calculus (PACE)', credits: 10, year: 12, ap: true, dual: 10 },
-      { name: 'AP Statistics', credits: 10, year: [11, 12], ap: true, dual: 6 }
+      { name: 'Statistics', credits: 10, year: [11, 12] },
+      { name: 'AP Statistics', credits: 10, year: [11, 12], ap: true, dual: 6 },
+      { name: 'Trigonometry', credits: 10, year: [11, 12] },
+      { name: 'Advanced Math', credits: 10, year: 12 }
     ],
     'Science': [
+      { name: 'Physical Science', credits: 10, year: [9, 10, 11] },
       { name: 'Biology', credits: 10, year: [9, 10, 11, 12] },
       { name: 'Chemistry', credits: 10, year: [10, 11, 12] },
       { name: 'Physics', credits: 10, year: [11, 12] },
+      { name: 'Accelerated Physics', credits: 10, year: [11, 12] },
+      { name: 'Earth, Energy, and Environment', credits: 10, year: [11, 12] },
+      { name: 'Anatomy and Physiology', credits: 10, year: [11, 12] },
+      { name: 'Advanced Chemistry', credits: 10, year: 12 },
       { name: 'AP Biology', credits: 10, year: 12, ap: true, dual: 8 },
+      { name: 'AP Environmental Science', credits: 10, year: [11, 12], ap: true },
       { name: 'AP Physics (PACE)', credits: 10, year: 12, ap: true, dual: 8 }
     ],
     'Speech': [
-      { name: 'Speech Communication', credits: 5, year: [10, 11, 12], semester: true }
+      { name: 'Speech Communication', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Competitive Public Speaking', credits: 5, year: [9, 10, 11, 12], semester: true }
     ],
     'P.E.': [
-      { name: 'Physical Education & Health', credits: 10, year: 9, required: true },
-      { name: 'Strength and Performance', credits: 5, year: [10, 11, 12], semester: true }
+      { name: 'Boys Physical Education & Health', credits: 10, year: 9, required: true },
+      { name: 'Girls Physical Education & Health', credits: 10, year: 9, required: true },
+      { name: 'Strength and Performance', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Boys Fitness, Recreation, and Sport', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Girls Fitness, Recreation, and Sport', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Lifetime Sports and Introduction to Officiating', credits: 5, year: [11, 12], semester: true }
     ],
     'Fine Arts': [
       { name: 'Art Fundamentals', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Art Fundamentals II', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Drawing', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Advanced Drawing', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Painting', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Advanced Painting', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Graphic Design', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Advanced Graphic Design', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Ceramics/Sculpture', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Advanced Ceramics/Sculpture', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Devotional Art', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Advanced Devotional Art', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Art History: Early Catholic Art to Renaissance', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Art History: Renaissance to Modern Catholic Art', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Photography', credits: 5, year: [11, 12], semester: true },
+      { name: 'Advanced Photography', credits: 5, year: 12, semester: true },
       { name: 'Marching Band', credits: 5, year: [9, 10, 11, 12], semester: true },
       { name: 'Concert Band', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Symphonic Band', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Orchestra', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Percussion Skills and Ensemble', credits: 5, year: [9, 10, 11, 12], semester: true },
       { name: "Women's Choir", credits: 10, year: [9, 10, 11, 12] },
-      { name: "Men's Choir", credits: 10, year: [9, 10, 11, 12] }
+      { name: "Men's Choir", credits: 10, year: [9, 10, 11, 12] },
+      { name: 'Sotto Voce', credits: 10, year: [10, 11, 12] },
+      { name: 'Concert Choir', credits: 10, year: [10, 11, 12] },
+      { name: 'Pius X Singers', credits: 10, year: [10, 11, 12] },
+      { name: 'Music Appreciation', credits: 5, year: [10, 11, 12], semester: true }
     ],
     'Life Skills': [
       { name: 'Computer Applications', credits: 5, year: [9, 10, 11, 12], semester: true },
-      { name: 'Career and Life Management', credits: 5, year: [9, 10], semester: true }
+      { name: 'Career and Life Management', credits: 5, year: [9, 10], semester: true },
+      { name: 'Food & Nutrition', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Housing and Interior Design', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Child Development, Care, Guidance, & Parenthood Education', credits: 5, year: [11, 12], semester: true },
+      { name: 'Textiles, Clothing and Design', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Advanced Textiles, Clothing, and Design', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Introduction to Culinary Arts', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Small Engines', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Machine Woodworking', credits: 10, year: [9, 10, 11, 12] },
+      { name: 'Building Construction', credits: 10, year: [9, 10, 11, 12] },
+      { name: 'Architectural Drafting', credits: 10, year: [9, 10, 11, 12] },
+      { name: 'Engineering Design I', credits: 10, year: [9, 10, 11, 12] }
+    ],
+    'Business & Technology': [
+      { name: 'Business Law', credits: 5, year: [11, 12], semester: true },
+      { name: 'Marketing', credits: 5, year: [11, 12], semester: true },
+      { name: 'Accounting I', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Accounting II', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Accounting III', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Web Design I', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Web Design II', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Introduction to Programming', credits: 5, year: [9, 10, 11, 12], semester: true },
+      { name: 'Computer Science', credits: 10, year: [11, 12], ap: true },
+      { name: 'Digital Media I', credits: 5, year: [10, 11, 12], semester: true },
+      { name: 'Digital Media II', credits: 5, year: [10, 11, 12], semester: true }
+    ],
+    'Languages': [
+      { name: 'French I', credits: 10, year: [9, 10, 11, 12] },
+      { name: 'French II', credits: 10, year: [10, 11, 12] },
+      { name: 'French III', credits: 10, year: [11, 12] },
+      { name: 'French IV', credits: 10, year: 12 },
+      { name: 'Spanish I', credits: 10, year: [9, 10, 11, 12] },
+      { name: 'Spanish II', credits: 10, year: [10, 11, 12] },
+      { name: 'Spanish III', credits: 10, year: [11, 12] },
+      { name: 'Spanish IV', credits: 10, year: 12, dual: 6 },
+      { name: 'Latin I', credits: 10, year: [9, 10, 11, 12] },
+      { name: 'Latin III', credits: 10, year: [10, 11, 12] },
+      { name: 'Latin IV', credits: 10, year: [10, 11, 12] }
     ],
     'Other': [
-      { name: 'Study Hall', credits: 0, year: [9, 10, 11, 12] }
+      { name: 'Study Hall', credits: 0, year: [9, 10, 11, 12] },
+      { name: 'Academic Decathlon', credits: 10, year: [9, 10, 11, 12] }
     ]
   };
 
