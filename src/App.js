@@ -21,6 +21,65 @@ const CoursePlanner = () => {
   const [pendingCourse, setPendingCourse] = useState(null);
   const [expandedDepts, setExpandedDepts] = useState({});
   const [hoveredCourse, setHoveredCourse] = useState(null);
+  const [showCareerModal, setShowCareerModal] = useState(false);
+  const [selectedCareer, setSelectedCareer] = useState(null);
+
+  const careerPathways = {
+    'Entrepreneur / Business': [
+      'Marketing', 'Business Law', 'Accounting I', 'Accounting II', 'Accounting III',
+      'Computer Applications', 'Web Design I', 'Web Design II', 'Digital Media I',
+      'Introduction to Programming', 'Computer Science', 'Speech Communication',
+      'Competitive Public Speaking', 'College Prep Writing', 'Creative Writing',
+      'Graphic Design', 'Advanced Graphic Design', 'Photography', 'Advanced Photography',
+      'Engineering Design I', 'AP Statistics', 'AP Calculus', 'Pre-Calculus',
+      'AP Physics (PACE)'
+    ],
+    'Healthcare': [
+      'Boys Physical Education & Health', 'Girls Physical Education & Health',
+      'AP Biology', 'AP Environmental Science', 'AP Physics (PACE)', 'Psychology',
+      'Human Relations', 'Family Issues', 'Child Development, Care, Guidance, & Parenthood Education',
+      'Food & Nutrition', 'Introduction to Culinary Arts', 'Speech Communication',
+      'College Prep Writing', 'Anatomy and Physiology', 'Chemistry', 'Advanced Chemistry'
+    ],
+    'Teaching': [
+      'Psychology', 'Human Relations', 'Child Development, Care, Guidance, & Parenthood Education',
+      'Speech Communication', 'College Prep Writing', 'Creative Writing',
+      'AP English Literature', 'Classic Literature I', 'Classic Literature II',
+      'AP Biology', 'AP Environmental Science', 'AP Calculus', 'AP Statistics',
+      'Differentiated Geometry', 'Differentiated Algebra I', 'Differentiated Algebra II',
+      'World History', 'United States History', 'American Government',
+      'Spanish I', 'Spanish II', 'Spanish III', 'Spanish IV', 'Latin I', 'Latin III', 'Latin IV',
+      'Computer Applications', 'Digital Media I', 'Web Design I', 'Graphic Design'
+    ],
+    'Financial Industry': [
+      'Accounting I', 'Accounting II', 'Accounting III', 'Business Law', 'Marketing',
+      'Computer Applications', 'Web Design I', 'Digital Media I',
+      'AP Statistics', 'Statistics', 'Trigonometry', 'Pre-Calculus', 'Advanced Math',
+      'AP Calculus', 'AP Calculus (PACE)', 'AP Human Geography', 'Economics',
+      'Psychology', 'College Prep Writing', 'Speech Communication',
+      'Journalism I', 'Journalism II'
+    ],
+    'Trades and Technical Work': [
+      'Engineering Design I', 'AP Physics (PACE)', 'Physics', 'Accelerated Physics',
+      'Computer Applications', 'Web Design I', 'Web Design II', 'Digital Media I',
+      'Introduction to Culinary Arts', 'Food & Nutrition',
+      'Child Development, Care, Guidance, & Parenthood Education',
+      'Graphic Design', 'Advanced Graphic Design', 'Photography', 'Advanced Photography',
+      'Art Fundamentals', 'Drawing', 'Painting', 'Ceramics/Sculpture',
+      'Accounting I', 'Accounting II', 'Marketing', 'Speech Communication',
+      'Small Engines', 'Machine Woodworking', 'Building Construction',
+      'Architectural Drafting'
+    ],
+    'Hospitality & Tourism': [
+      'Food & Nutrition', 'Introduction to Culinary Arts', 'Marketing',
+      'Accounting I', 'Accounting II', 'Accounting III', 'Business Law',
+      'Career and Life Management', 'Speech Communication', 'Digital Media I', 'Digital Media II',
+      'College Prep Writing', 'World Geography', 'AP Human Geography',
+      'Psychology', 'Human Relations', 'Spanish I', 'Spanish II', 'Spanish III', 'Spanish IV',
+      'Latin I', 'Housing and Interior Design', 'Graphic Design', 'Advanced Graphic Design',
+      'Photography', 'Advanced Photography'
+    ]
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('piusx-planner');
@@ -959,6 +1018,27 @@ const CoursePlanner = () => {
             </div>
           </div>
         </div>
+
+        {/* Career Pathways Section - Bottom of Page */}
+        <div className="mt-8 bg-white rounded-lg shadow-lg p-6 print:hidden">
+          <h2 className="text-2xl font-bold mb-4" style={{ color: '#046a38' }}>Career Pathways</h2>
+          <p className="text-sm text-gray-600 mb-4">Explore recommended courses by career interest</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {Object.keys(careerPathways).map(career => (
+              <button
+                key={career}
+                onClick={() => {
+                  setSelectedCareer(career);
+                  setShowCareerModal(true);
+                }}
+                className="text-left px-4 py-3 rounded-lg border-2 border-gray-200 hover:border-green-600 hover:bg-green-50 transition"
+              >
+                <span className="font-semibold text-gray-800">{career}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {showCourseModal && pendingCourse && (
@@ -994,6 +1074,55 @@ const CoursePlanner = () => {
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {showCareerModal && selectedCareer && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full" style={{ maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold" style={{ color: '#046a38' }}>{selectedCareer}</h3>
+              <button
+                onClick={() => {
+                  setShowCareerModal(false);
+                  setSelectedCareer(null);
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <p className="text-sm text-gray-600 mb-4">Click on any course to add it to your schedule:</p>
+            
+            <div className="overflow-y-auto flex-1 space-y-2 pr-2">
+              {careerPathways[selectedCareer].map(courseName => {
+                const course = Object.values(courses).flat().find(c => c.name === courseName);
+                const dept = Object.entries(courses).find(([_, courseList]) => 
+                  courseList.some(c => c.name === courseName)
+                )?.[0] || 'Other';
+                
+                return (
+                  <button
+                    key={courseName}
+                    onClick={() => {
+                      setPendingCourse({ name: courseName, dept });
+                      setShowCareerModal(false);
+                      setShowCourseModal(true);
+                    }}
+                    className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:bg-green-50 hover:border-green-600 transition flex justify-between items-center"
+                  >
+                    <div>
+                      <span className="font-medium text-sm">{courseName}</span>
+                      {course?.ap && <span className="ml-2 text-xs bg-purple-600 text-white px-2 py-1 rounded">AP</span>}
+                      {course?.dual && <span className="ml-2 text-xs bg-green-600 text-white px-2 py-1 rounded">Dual</span>}
+                    </div>
+                    {course && <span className="text-xs text-gray-600">{course.credits} cr</span>}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
