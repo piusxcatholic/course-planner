@@ -5,7 +5,7 @@ const CoursePlanner = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [showWelcome, setShowWelcome] = useState(true);
-  const [welcomeStep, setWelcomeStep] = useState(1);
+  const [welcomeStep, setWelcomeStep] = useState(0);
   const [userPreferences, setUserPreferences] = useState({ 
     firstName: '',
     gender: '',
@@ -332,6 +332,13 @@ const CoursePlanner = () => {
       }, 0);
   };
 
+  const getMissingSubjects = (year) => {
+    const coreSubjects = ['English', 'Social Studies', 'Math', 'Science', 'Theology'];
+    const yearCourses = selectedCourses.filter(c => c.year === year);
+    const presentDepts = [...new Set(yearCourses.map(c => c.dept))];
+    return coreSubjects.filter(subject => !presentDepts.includes(subject));
+  };
+
   const clearData = () => {
     if (window.confirm('Are you sure you want to clear all data and start over?')) {
       localStorage.removeItem('piusx-planner');
@@ -380,7 +387,44 @@ const CoursePlanner = () => {
             <GraduationCap className="w-16 h-16 text-blue-900" />
           </div>
           <h1 className="text-3xl font-bold text-center text-blue-900 mb-2">Pius X Course Planner</h1>
-          <p className="text-gray-600 text-center mb-8">Let's get started with a few questions</p>
+          <p className="text-gray-600 text-center mb-8">Plan your four-year journey</p>
+          
+          {welcomeStep === 0 && (
+            <div className="space-y-4">
+              <button
+                onClick={() => setWelcomeStep(1)}
+                className="w-full p-6 border-2 border-blue-900 rounded-lg hover:bg-blue-50 transition text-left"
+              >
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-12 h-12 bg-blue-900 text-white rounded-full flex items-center justify-center font-bold text-xl mr-4">
+                    1
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-blue-900 mb-1">Start-Up Guide</h3>
+                    <p className="text-sm text-gray-600">Answer a few questions and we'll help auto-pick your courses based on your interests</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowWelcome(false);
+                  setWelcomeStep(1);
+                }}
+                className="w-full p-6 border-2 border-blue-900 rounded-lg hover:bg-blue-50 transition text-left"
+              >
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-12 h-12 bg-blue-900 text-white rounded-full flex items-center justify-center font-bold text-xl mr-4">
+                    2
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-blue-900 mb-1">Go Straight to Schedule</h3>
+                    <p className="text-sm text-gray-600">Already know what courses you want? Build your schedule from scratch</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          )}
           
           {welcomeStep === 1 && (
             <div className="space-y-6">
@@ -789,8 +833,15 @@ const CoursePlanner = () => {
                   return (
                     <div key={yearName} className="mb-6">
                       <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-semibold text-lg">{yearName}</h4>
-                        <span className="text-sm text-gray-600">{yearCredits} credits</span>
+                        <div className="flex items-center gap-3">
+                          <h4 className="font-semibold text-lg">{yearName}</h4>
+                          {getMissingSubjects(year).length > 0 && (
+                            <span className="text-xs text-gray-500">
+                              Need: {getMissingSubjects(year).join(', ')}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-sm text-gray-600">{yearCredits}/80 credits</span>
                       </div>
                       {yearCredits > 80 && (
                         <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded flex items-start">
@@ -824,8 +875,15 @@ const CoursePlanner = () => {
                   return (
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-semibold text-lg capitalize">{activeTab}</h4>
-                        <span className="text-sm text-gray-600">{yearCredits} credits</span>
+                        <div className="flex items-center gap-3">
+                          <h4 className="font-semibold text-lg capitalize">{activeTab}</h4>
+                          {getMissingSubjects(year).length > 0 && (
+                            <span className="text-xs text-gray-500">
+                              Need: {getMissingSubjects(year).join(', ')}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-sm text-gray-600">{yearCredits}/80 credits</span>
                       </div>
                       {yearCredits > 80 && (
                         <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded flex items-start">
