@@ -457,6 +457,20 @@ body {
   color: #fff;
   background: var(--green);
   padding: 8px 13px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.year-heading-title { white-space: nowrap; }
+.year-missing {
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: rgba(255,255,255,0.8);
+  font-style: italic;
 }
 .semesters-row { display: grid; grid-template-columns: 1fr 1fr; }
 
