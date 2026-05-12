@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './styles.css';
 
-// Course catalog with all courses from handbook
 const COURSE_CATALOG = [
   // THEOLOGY
   { id: 'THEO1', name: 'Theology I', code: 'THEO1', credits: 10, subject: 'Theology', grade: 9, prereqs: [], semesters: 2 },
   { id: 'THEO2', name: 'Theology II', code: 'THEO2', credits: 10, subject: 'Theology', grade: 10, prereqs: ['THEO1'], semesters: 2 },
   { id: 'THEO3', name: 'Theology III', code: 'THEO3', credits: 10, subject: 'Theology', grade: 11, prereqs: ['THEO2'], semesters: 2 },
   { id: 'THEO4', name: 'Theology IV', code: 'THEO4', credits: 10, subject: 'Theology', grade: 12, prereqs: ['THEO3'], semesters: 2 },
-  
   // ENGLISH
   { id: 'ENG1', name: 'English I', code: 'ENG1', credits: 10, subject: 'English', grade: 9, prereqs: [], semesters: 2 },
   { id: 'ENG2', name: 'English II', code: 'ENG2', credits: 10, subject: 'English', grade: 10, prereqs: ['ENG1'], semesters: 2 },
@@ -22,7 +20,6 @@ const COURSE_CATALOG = [
   { id: 'JOURN1', name: 'Journalism I', code: 'ENG190', credits: 10, subject: 'English', grade: 9, prereqs: [], semesters: 2 },
   { id: 'JOURN2', name: 'Journalism II', code: 'ENG195', credits: 10, subject: 'English', grade: 10, prereqs: ['JOURN1'], semesters: 2 },
   { id: 'YEARBOOK', name: 'Yearbook', code: 'ENG200', credits: 10, subject: 'English', grade: 10, prereqs: [], semesters: 2 },
-  
   // MATH
   { id: 'ALGESS', name: 'Algebra Essentials', code: 'MATH075', credits: 10, subject: 'Math', grade: 9, prereqs: [], semesters: 2 },
   { id: 'ALG1', name: 'Algebra I', code: 'MATH070', credits: 10, subject: 'Math', grade: 9, prereqs: [], semesters: 2 },
@@ -39,12 +36,10 @@ const COURSE_CATALOG = [
   { id: 'APPRECALC', name: 'AP Pre-Calculus', code: 'MATH035', credits: 10, subject: 'Math', grade: 11, prereqs: ['DIFFALG2'], semesters: 2 },
   { id: 'APCALC', name: 'AP Calculus', code: 'MATH050', credits: 10, subject: 'Math', grade: 12, prereqs: ['PRECALC'], semesters: 2 },
   { id: 'APCALCPACE', name: 'AP Calculus (PACE)', code: 'MATH060', credits: 10, subject: 'Math', grade: 12, prereqs: ['PRECALC'], semesters: 2 },
-  
   // SCIENCE
   { id: 'PHYSCI', name: 'Physical Science', code: 'SCI000', credits: 10, subject: 'Science', grade: 9, prereqs: [], semesters: 2 },
   { id: 'BIO', name: 'Biology', code: 'SCI010', credits: 10, subject: 'Science', grade: 9, prereqs: [], semesters: 2 },
   { id: 'CHEM', name: 'Chemistry', code: 'SCI020', credits: 10, subject: 'Science', grade: 10, prereqs: ['BIO'], semesters: 2 },
-  // Earth, Energy, Environment: prereq Biology AND (Physical Science OR Chemistry)
   { id: 'EARTHSCI', name: 'Earth, Energy, and Environment', code: 'SCI090', credits: 10, subject: 'Science', grade: 11, prereqs: ['BIO', 'PHYSCI', 'CHEM'], prereqsAllRequired: ['BIO'], prereqsAnyOf: true, prereqsAnyOfGroup: ['PHYSCI', 'CHEM'], semesters: 2 },
   { id: 'PHYSICS', name: 'Physics', code: 'SCI030', credits: 10, subject: 'Science', grade: 11, prereqs: ['CHEM', 'GEOM'], semesters: 2 },
   { id: 'ACCPHYS', name: 'Accelerated Physics', code: 'SCI070', credits: 10, subject: 'Science', grade: 11, prereqs: ['CHEM', 'PRECALC'], semesters: 2 },
@@ -53,7 +48,6 @@ const COURSE_CATALOG = [
   { id: 'ADVCHEM', name: 'Advanced Chemistry', code: 'SCI060', credits: 10, subject: 'Science', grade: 12, prereqs: ['PHYSICS'], semesters: 2 },
   { id: 'APBIO', name: 'AP Biology', code: 'SCI040', credits: 10, subject: 'Science', grade: 12, prereqs: [], semesters: 2 },
   { id: 'APPHYSPACE', name: 'AP Physics (PACE)', code: 'SCI080', credits: 10, subject: 'Science', grade: 12, prereqs: ['PHYSICS', 'PRECALC'], semesters: 2 },
-  
   // SOCIAL STUDIES
   { id: 'WORLDGEO', name: 'World Geography', code: 'SS000', credits: 5, subject: 'Social Studies', grade: 9, prereqs: [], semesters: 1 },
   { id: 'APHUMANGEO', name: 'AP Human Geography', code: 'SS090', credits: 10, subject: 'Social Studies', grade: 10, prereqs: ['WORLDHIST'], semesters: 2 },
@@ -67,19 +61,16 @@ const COURSE_CATALOG = [
   { id: 'ECON', name: 'Economics', code: 'SS080', credits: 5, subject: 'Social Studies', grade: 12, prereqs: [], semesters: 1 },
   { id: 'HUMANREL', name: 'Human Relations', code: 'FCS830', credits: 5, subject: 'Social Studies', grade: 11, prereqs: [], semesters: 1 },
   { id: 'FAMISSUES', name: 'Family Issues', code: 'FCS850', credits: 5, subject: 'Social Studies', grade: 11, prereqs: [], semesters: 1 },
-  
   // SPEECH
   { id: 'SPEECHCOM', name: 'Speech Communication', code: 'SPE520', credits: 5, subject: 'Speech', grade: 10, prereqs: [], semesters: 1 },
   { id: 'COMPPUBSPEAK', name: 'Competitive Public Speaking', code: 'SPE523', credits: 5, subject: 'Speech', grade: 9, prereqs: [], semesters: 1 },
-  
   // PE
-  { id: 'GIRLSPEHEALTH', name: 'Girls Physical Education & Health', code: 'PE000', credits: 10, subject: 'PE', grade: 9, prereqs: [], semesters: 2 },
-  { id: 'BOYSPEHEALTH', name: 'Boys Physical Education & Health', code: 'PE010', credits: 10, subject: 'PE', grade: 9, prereqs: [], semesters: 2 },
+  { id: 'GIRLSPEHEALTH', name: 'Girls Physical Education & Health', code: 'PE000', credits: 10, subject: 'PE', grade: 9, prereqs: [], semesters: 2, genderRestriction: 'female' },
+  { id: 'BOYSPEHEALTH', name: 'Boys Physical Education & Health', code: 'PE010', credits: 10, subject: 'PE', grade: 9, prereqs: [], semesters: 2, genderRestriction: 'male' },
   { id: 'STRENGTH1', name: 'Strength and Performance Sem. 1', code: 'PE020', credits: 5, subject: 'PE', grade: 10, prereqs: [], semesters: 1 },
   { id: 'STRENGTH2', name: 'Strength and Performance Sem. 2', code: 'PE030', credits: 5, subject: 'PE', grade: 10, prereqs: [], semesters: 1 },
-  { id: 'BOYSFITNESS', name: 'Boys Fitness, Recreation, and Sport', code: 'PE045', credits: 5, subject: 'PE', grade: 10, prereqs: [], semesters: 1 },
-  { id: 'GIRLSFITNESS', name: 'Girls Fitness, Recreation, and Sport', code: 'PE055', credits: 5, subject: 'PE', grade: 10, prereqs: [], semesters: 1 },
-  
+  { id: 'BOYSFITNESS', name: 'Boys Fitness, Recreation, and Sport', code: 'PE045', credits: 5, subject: 'PE', grade: 10, prereqs: [], semesters: 1, genderRestriction: 'male' },
+  { id: 'GIRLSFITNESS', name: 'Girls Fitness, Recreation, and Sport', code: 'PE055', credits: 5, subject: 'PE', grade: 10, prereqs: [], semesters: 1, genderRestriction: 'female' },
   // FINE ARTS
   { id: 'ARTFUND', name: 'Art Fundamentals', code: 'ART000', credits: 5, subject: 'Fine Arts', grade: 9, prereqs: [], semesters: 1 },
   { id: 'ARTFUND2', name: 'Art Fundamentals II', code: 'ART250', credits: 5, subject: 'Fine Arts', grade: 9, prereqs: ['ARTFUND'], semesters: 1 },
@@ -95,18 +86,14 @@ const COURSE_CATALOG = [
   { id: 'ADVDEVOT', name: 'Advanced Devotional Art', code: 'ART150', credits: 5, subject: 'Fine Arts', grade: 10, prereqs: ['DEVOTART'], semesters: 1 },
   { id: 'PHOTO', name: 'Photography', code: 'ART200', credits: 5, subject: 'Fine Arts', grade: 11, prereqs: [], semesters: 1 },
   { id: 'ADVPHOTO', name: 'Advanced Photography', code: 'ART210', credits: 5, subject: 'Fine Arts', grade: 12, prereqs: ['PHOTO'], semesters: 1 },
-
-  // Marching Band (Sem 1) + Concert Band (Sem 2) are paired as a single year-long band enrollment (10 credits total)
-  { id: 'BAND', name: 'Band (Marching Band + Concert Band)', code: 'MUS300/310', credits: 10, subject: 'Fine Arts', grade: 9, prereqs: [], semesters: 2, isBandPair: true },
-
+  { id: 'BAND', name: 'Band (Marching + Concert)', code: 'MUS300/310', credits: 10, subject: 'Fine Arts', grade: 9, prereqs: [], semesters: 2, isBandPair: true },
   { id: 'SYMPBAND', name: 'Symphonic Band', code: 'MUS320', credits: 5, subject: 'Fine Arts', grade: 9, prereqs: ['BAND'], semesters: 1 },
   { id: 'ORCHESTRA', name: 'Orchestra', code: 'MUS325', credits: 5, subject: 'Fine Arts', grade: 9, prereqs: [], semesters: 1 },
-  { id: 'WOMENCHOIR', name: "Women's Choir", code: 'MUS335', credits: 10, subject: 'Fine Arts', grade: 9, prereqs: [], semesters: 2 },
-  { id: 'MENCHOIR', name: "Men's Choir", code: 'MUS345', credits: 10, subject: 'Fine Arts', grade: 9, prereqs: [], semesters: 2 },
+  { id: 'WOMENCHOIR', name: "Women's Choir", code: 'MUS335', credits: 10, subject: 'Fine Arts', grade: 9, prereqs: [], semesters: 2, genderRestriction: 'female' },
+  { id: 'MENCHOIR', name: "Men's Choir", code: 'MUS345', credits: 10, subject: 'Fine Arts', grade: 9, prereqs: [], semesters: 2, genderRestriction: 'male' },
   { id: 'SOTTOVOCE', name: 'Sotto Voce', code: 'MUS350', credits: 10, subject: 'Fine Arts', grade: 10, prereqs: [], semesters: 2 },
   { id: 'CONCERTCHOIR', name: 'Concert Choir', code: 'MUS380', credits: 10, subject: 'Fine Arts', grade: 10, prereqs: [], semesters: 2 },
   { id: 'MUSICAPP', name: 'Music Appreciation', code: 'MUS420', credits: 5, subject: 'Fine Arts', grade: 10, prereqs: [], semesters: 1 },
-  
   // LIFE SKILLS
   { id: 'COMPAPP', name: 'Computer Applications', code: 'BUS600', credits: 5, subject: 'Life Skills', grade: 9, prereqs: [], semesters: 1 },
   { id: 'ACCT1', name: 'Accounting I', code: 'BUS630', credits: 5, subject: 'Life Skills', grade: 9, prereqs: [], semesters: 1 },
@@ -117,7 +104,6 @@ const COURSE_CATALOG = [
   { id: 'TEXTILES', name: 'Textiles, Clothing and Design', code: 'FCS860', credits: 5, subject: 'Life Skills', grade: 9, prereqs: [], semesters: 1 },
   { id: 'SMALLENG', name: 'Small Engines', code: 'IT900', credits: 5, subject: 'Life Skills', grade: 9, prereqs: [], semesters: 1 },
   { id: 'MACHINEWOOD', name: 'Machine Woodworking', code: 'IT910', credits: 10, subject: 'Life Skills', grade: 9, prereqs: [], semesters: 2 },
-  
   // WORLD LANGUAGES
   { id: 'FRENCH1', name: 'French I', code: 'WL000', credits: 10, subject: 'World Languages', grade: 9, prereqs: [], semesters: 2 },
   { id: 'FRENCH2', name: 'French II', code: 'WL010', credits: 10, subject: 'World Languages', grade: 10, prereqs: ['FRENCH1'], semesters: 2 },
@@ -132,394 +118,453 @@ const COURSE_CATALOG = [
   { id: 'LATIN4', name: 'Latin IV', code: 'WL130', credits: 10, subject: 'World Languages', grade: 10, prereqs: [], semesters: 2 },
 ];
 
-// Helper: check if prereqs are satisfied for a course given already-added courses
-// Supports standard (all required), anyOf (any one of the list), and the special compound case for Earth Science
+const MATH_STARTING_OPTIONS = [
+  { id: 'ALGESS',  label: 'Algebra Essentials' },
+  { id: 'ALG1',    label: 'Algebra I' },
+  { id: 'DIFFALG1',label: 'Differentiated Algebra I' },
+  { id: 'DIFFGEOM',label: 'Differentiated Geometry' },
+  { id: 'GEOM',    label: 'Geometry' },
+];
+
 const checkPrereqs = (catalogCourse, addedCourses) => {
   const addedIds = new Set(addedCourses.map(c => c.id));
-
-  // Special compound: prereqsAllRequired (all must be present) + prereqsAnyOfGroup (at least one must be present)
   if (catalogCourse.prereqsAllRequired && catalogCourse.prereqsAnyOfGroup) {
-    const missingRequired = catalogCourse.prereqsAllRequired.filter(id => !addedIds.has(id));
-    const anyOfMet = catalogCourse.prereqsAnyOfGroup.some(id => addedIds.has(id));
-    const missing = [...missingRequired];
-    if (!anyOfMet) {
-      // Add whichever anyOf courses are missing as options
-      catalogCourse.prereqsAnyOfGroup.forEach(id => {
-        if (!addedIds.has(id)) missing.push(id);
-      });
-    }
-    // Return just the truly missing ones
     const missingAll = catalogCourse.prereqsAllRequired.filter(id => !addedIds.has(id));
-    if (missingAll.length > 0 || !anyOfMet) {
-      const result = [...missingAll];
-      if (!anyOfMet) {
-        result.push(...catalogCourse.prereqsAnyOfGroup.filter(id => !addedIds.has(id)));
-      }
-      return result;
-    }
-    return [];
+    const anyOfMet  = catalogCourse.prereqsAnyOfGroup.some(id => addedIds.has(id));
+    const result = [...missingAll];
+    if (!anyOfMet) result.push(...catalogCourse.prereqsAnyOfGroup.filter(id => !addedIds.has(id)));
+    return result;
   }
-
-  // anyOf: need at least one
   if (catalogCourse.prereqsAnyOf && !catalogCourse.prereqsAllRequired) {
-    const anyMet = catalogCourse.prereqs.some(id => addedIds.has(id));
-    if (!anyMet) {
+    if (!catalogCourse.prereqs.some(id => addedIds.has(id)))
       return catalogCourse.prereqs.filter(id => !addedIds.has(id));
-    }
     return [];
   }
-
-  // Default: all prereqs required
   return catalogCourse.prereqs.filter(id => !addedIds.has(id));
 };
 
 const GRADUATION_REQUIREMENTS = {
-  'Theology': 40,
-  'English': 40,
+  'Theology':       40,
+  'English':        40,
   'Social Studies': 35,
-  'Math': 30,
-  'Science': 30,
-  'Speech': 5,
-  'PE': 15,
-  'Fine Arts': 5,
-  'Life Skills': 5,
-  'World Languages': 20,
+  'Math':           30,
+  'Science':        30,
+  'Speech':          5,
+  'PE':             15,
+  'Fine Arts':       5,
+  'Life Skills':     5,
+  'World Languages':20,
 };
 
-// 8 periods in a day; each 5-credit semester course = 1 period, 10-credit year course = 1 period
-// Total credits / (credits per period) = periods
-// A semester 5-credit course = 0.5 periods per year; a year-long 10-credit course = 1 period per year
-// For display: total periods = total credits / 10 (since 10 credits = 1 period-year)
-const TOTAL_PERIODS = 8;
-const CREDITS_PER_PERIOD = 10; // 10 credits = 1 period for a full year
+const CREDITS_PER_PERIOD = 10;
+const TOTAL_PERIODS      = 8;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Intro Screen
+// ─────────────────────────────────────────────────────────────────────────────
+function IntroScreen({ onComplete }) {
+  const [name,        setName]        = useState('');
+  const [gender,      setGender]      = useState('');
+  const [startingMath,setStartingMath]= useState('');
+  const [studyHall,   setStudyHall]   = useState(false);
+  const [music,       setMusic]       = useState('none');
+
+  const canSubmit = name.trim() && gender && startingMath;
+
+  const handleSubmit = () => {
+    if (!canSubmit) return;
+    onComplete({ name: name.trim(), gender, startingMath, studyHall, music });
+  };
+
+  return (
+    <div className="intro-overlay">
+      <div className="intro-card">
+        <div className="intro-header">
+          <img
+            src="https://piusxcatholic.github.io/course-planner/logo.png"
+            alt="Pius X"
+            className="intro-logo"
+            onError={e => { e.target.style.display = 'none'; }}
+          />
+          <h1>Pius X 4-Year Course Planner</h1>
+          <p className="intro-subtitle">Answer a few questions to personalize your plan.</p>
+        </div>
+
+        <div className="intro-body">
+          {/* Name */}
+          <div className="intro-field">
+            <label>Student Name</label>
+            <input
+              type="text"
+              placeholder="First and last name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              className="intro-input"
+            />
+          </div>
+
+          {/* Gender */}
+          <div className="intro-field">
+            <label>Gender</label>
+            <div className="intro-toggle-group">
+              {['male','female'].map(g => (
+                <button
+                  key={g}
+                  className={`intro-toggle${gender === g ? ' selected' : ''}`}
+                  onClick={() => setGender(g)}
+                >
+                  {g === 'male' ? 'Male' : 'Female'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Starting Math */}
+          <div className="intro-field">
+            <label>Starting Math Course (9th Grade)</label>
+            <div className="intro-option-list">
+              {MATH_STARTING_OPTIONS.map(opt => (
+                <button
+                  key={opt.id}
+                  className={`intro-option${startingMath === opt.id ? ' selected' : ''}`}
+                  onClick={() => setStartingMath(opt.id)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Music */}
+          <div className="intro-field">
+            <label>Music (optional)</label>
+            <div className="intro-toggle-group">
+              {[
+                { val: 'none',  label: 'None' },
+                { val: 'band',  label: 'Band' },
+                { val: 'choir', label: 'Choir' },
+              ].map(opt => (
+                <button
+                  key={opt.val}
+                  className={`intro-toggle${music === opt.val ? ' selected' : ''}`}
+                  onClick={() => setMusic(opt.val)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Study Hall */}
+          <div className="intro-field intro-field-row">
+            <label>Include a Study Hall period?</label>
+            <button
+              className={`intro-toggle${studyHall ? ' selected' : ''}`}
+              onClick={() => setStudyHall(!studyHall)}
+            >
+              {studyHall ? 'Yes' : 'No'}
+            </button>
+          </div>
+        </div>
+
+        <div className="intro-footer">
+          <button
+            className="intro-submit"
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+          >
+            Build My Plan →
+          </button>
+          {!canSubmit && (
+            <p className="intro-hint">Please enter your name, gender, and starting math course to continue.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main App
+// ─────────────────────────────────────────────────────────────────────────────
 function App() {
-  const [courses, setCourses] = useState([]);
-  const [viewMode, setViewMode] = useState('semester'); // 'semester' or 'subject'
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState('all');
-  const [showPrereqModal, setShowPrereqModal] = useState(false);
-  const [prereqError, setPrereqError] = useState(null);
+  const [studentInfo,      setStudentInfo]      = useState(null);
+  const [courses,          setCourses]          = useState([]);
+  const [viewMode,         setViewMode]         = useState('semester');
+  const [searchTerm,       setSearchTerm]       = useState('');
+  const [selectedSubject,  setSelectedSubject]  = useState('all');
+  const [showPrereqModal,  setShowPrereqModal]  = useState(false);
+  const [prereqError,      setPrereqError]      = useState(null);
 
-  // Load from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem('piusXCoursePlan');
-    if (saved) {
-      try {
-        setCourses(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to load saved plan');
-      }
-    }
+    const savedInfo    = localStorage.getItem('piusXStudentInfo');
+    const savedCourses = localStorage.getItem('piusXCoursePlan');
+    if (savedInfo)    { try { setStudentInfo(JSON.parse(savedInfo));   } catch(e){} }
+    if (savedCourses) { try { setCourses(JSON.parse(savedCourses));    } catch(e){} }
   }, []);
 
-  // Save to localStorage whenever courses change
   useEffect(() => {
     localStorage.setItem('piusXCoursePlan', JSON.stringify(courses));
   }, [courses]);
 
-  const addCourse = (catalogCourse) => {
-    // Check prerequisites
-    const missingPrereqs = checkPrereqs(catalogCourse, courses);
+  const handleIntroComplete = (info) => {
+    setStudentInfo(info);
+    localStorage.setItem('piusXStudentInfo', JSON.stringify(info));
 
+    const seed = [];
+    const now  = Date.now();
+
+    // Theology I-IV
+    ['THEO1','THEO2','THEO3','THEO4'].forEach((id, i) => {
+      const c = COURSE_CATALOG.find(x => x.id === id);
+      if (c) seed.push({ ...c, uniqueId: now + i, year: 9 + i, semester: 'Fall' });
+    });
+
+    // Starting math
+    const math = COURSE_CATALOG.find(x => x.id === info.startingMath);
+    if (math) seed.push({ ...math, uniqueId: now + 10, year: 9, semester: 'Fall' });
+
+    // Gender-appropriate PE
+    const peId = info.gender === 'female' ? 'GIRLSPEHEALTH' : 'BOYSPEHEALTH';
+    const pe   = COURSE_CATALOG.find(x => x.id === peId);
+    if (pe) seed.push({ ...pe, uniqueId: now + 11, year: 9, semester: 'Fall' });
+
+    // Music
+    if (info.music === 'band') {
+      const band = COURSE_CATALOG.find(x => x.id === 'BAND');
+      if (band) seed.push({ ...band, uniqueId: now + 12, year: 9, semester: 'Fall' });
+    } else if (info.music === 'choir') {
+      const choirId = info.gender === 'female' ? 'WOMENCHOIR' : 'MENCHOIR';
+      const choir   = COURSE_CATALOG.find(x => x.id === choirId);
+      if (choir) seed.push({ ...choir, uniqueId: now + 13, year: 9, semester: 'Fall' });
+    }
+
+    setCourses(seed);
+  };
+
+  const resetPlan = () => {
+    if (!window.confirm('Start over? This will clear your entire plan.')) return;
+    setStudentInfo(null);
+    setCourses([]);
+    localStorage.removeItem('piusXStudentInfo');
+    localStorage.removeItem('piusXCoursePlan');
+  };
+
+  const addCourse = (catalogCourse) => {
+    const missingPrereqs = checkPrereqs(catalogCourse, courses);
     if (missingPrereqs.length > 0) {
-      const missingCourseNames = missingPrereqs.map(prereqId => {
-        const course = COURSE_CATALOG.find(c => c.id === prereqId);
-        return course ? course.name : prereqId;
-      });
-      
       setPrereqError({
-        courseName: catalogCourse.name,
-        missingPrereqs: missingPrereqs,
-        missingNames: missingCourseNames,
-        isAnyOf: catalogCourse.prereqsAnyOf && !catalogCourse.prereqsAllRequired,
+        courseName:    catalogCourse.name,
+        missingPrereqs,
+        missingNames:  missingPrereqs.map(id => COURSE_CATALOG.find(x => x.id === id)?.name || id),
+        isAnyOf:       catalogCourse.prereqsAnyOf && !catalogCourse.prereqsAllRequired,
       });
       setShowPrereqModal(true);
       return;
     }
 
-    // Determine year and semester based on existing courses
-    const currentYear = determineYear(catalogCourse);
-    const currentSemester = 'Fall'; // Year-long starts in Fall
-    
-    const newCourse = {
-      ...catalogCourse,
-      uniqueId: Date.now(),
-      year: currentYear,
-      semester: currentSemester,
-    };
+    const newCourse = { ...catalogCourse, uniqueId: Date.now(), year: catalogCourse.grade || 9, semester: 'Fall' };
+    let newCourses  = [...courses, newCourse];
 
-    let newCourses = [...courses, newCourse];
-
-    // Auto-add sequential theology courses
     if (catalogCourse.id === 'THEO1') {
-      const theo2 = COURSE_CATALOG.find(c => c.id === 'THEO2');
-      const theo3 = COURSE_CATALOG.find(c => c.id === 'THEO3');
-      const theo4 = COURSE_CATALOG.find(c => c.id === 'THEO4');
-      
-      newCourses.push({
-        ...theo2,
-        uniqueId: Date.now() + 1,
-        year: 10,
-        semester: 'Fall'
-      });
-      newCourses.push({
-        ...theo3,
-        uniqueId: Date.now() + 2,
-        year: 11,
-        semester: 'Fall'
-      });
-      newCourses.push({
-        ...theo4,
-        uniqueId: Date.now() + 3,
-        year: 12,
-        semester: 'Fall'
+      ['THEO2','THEO3','THEO4'].forEach((id, i) => {
+        const c = COURSE_CATALOG.find(x => x.id === id);
+        if (c) newCourses.push({ ...c, uniqueId: Date.now() + i + 1, year: 10 + i, semester: 'Fall' });
       });
     }
-
     setCourses(newCourses);
   };
 
   const addMissingPrereq = (prereqId) => {
-    const prereqCourse = COURSE_CATALOG.find(c => c.id === prereqId);
-    if (prereqCourse) {
-      addCourse(prereqCourse);
-      setShowPrereqModal(false);
-    }
-  };
-
-  const determineYear = (catalogCourse) => {
-    // Find the highest year currently in the plan
-    const yearsInPlan = courses.map(c => c.year);
-    const maxYear = yearsInPlan.length > 0 ? Math.max(...yearsInPlan) : 9;
-    
-    // Use the catalog's suggested grade, or place after current max
-    return catalogCourse.grade || Math.min(maxYear, 12);
+    const c = COURSE_CATALOG.find(x => x.id === prereqId);
+    if (c) { addCourse(c); setShowPrereqModal(false); }
   };
 
   const deleteCourse = (uniqueId) => {
-    // Check if any other courses depend on this one
-    const courseToDelete = courses.find(c => c.uniqueId === uniqueId);
-    if (!courseToDelete) return;
-
-    const dependentCourses = courses.filter(c => 
-      c.prereqs && c.prereqs.includes(courseToDelete.id)
-    );
-
-    if (dependentCourses.length > 0) {
-      if (!window.confirm(`Removing ${courseToDelete.name} will also remove courses that depend on it: ${dependentCourses.map(c => c.name).join(', ')}. Continue?`)) {
-        return;
-      }
-      // Remove this course and all dependent courses
-      const idsToRemove = [uniqueId, ...dependentCourses.map(c => c.uniqueId)];
-      setCourses(courses.filter(c => !idsToRemove.includes(c.uniqueId)));
+    const toDelete   = courses.find(c => c.uniqueId === uniqueId);
+    if (!toDelete) return;
+    const dependents = courses.filter(c => c.prereqs && c.prereqs.includes(toDelete.id));
+    if (dependents.length > 0) {
+      if (!window.confirm(`Removing ${toDelete.name} will also remove: ${dependents.map(c => c.name).join(', ')}. Continue?`)) return;
+      const ids = [uniqueId, ...dependents.map(c => c.uniqueId)];
+      setCourses(courses.filter(c => !ids.includes(c.uniqueId)));
     } else {
       setCourses(courses.filter(c => c.uniqueId !== uniqueId));
     }
   };
 
-  const updateCourseSemester = (uniqueId, semester, year) => {
-    setCourses(courses.map(c => 
-      c.uniqueId === uniqueId 
-        ? { ...c, semester, year: year || c.year }
-        : c
-    ));
-  };
-
-  const getYearLabel = (year) => {
-    const labels = { 9: 'FR', 10: 'SO', 11: 'JR', 12: 'SR' };
-    return labels[year] || year;
-  };
+  const getYearLabel = (yr) => ({ 9:'Freshman', 10:'Sophomore', 11:'Junior', 12:'Senior' }[yr] || yr);
 
   const calculateProgress = () => {
-    const progress = {};
+    const prog = {};
     Object.keys(GRADUATION_REQUIREMENTS).forEach(subject => {
-      const earned = courses
-        .filter(c => c.subject === subject)
-        .reduce((sum, c) => sum + c.credits, 0);
-      progress[subject] = {
+      const earned = courses.filter(c => c.subject === subject).reduce((s, c) => s + c.credits, 0);
+      prog[subject] = {
         earned,
-        required: GRADUATION_REQUIREMENTS[subject],
-        percentage: Math.min(100, (earned / GRADUATION_REQUIREMENTS[subject]) * 100)
+        required:   GRADUATION_REQUIREMENTS[subject],
+        percentage: Math.min(100, (earned / GRADUATION_REQUIREMENTS[subject]) * 100),
       };
     });
-    return progress;
+    return prog;
   };
 
-  const totalCredits = courses.reduce((sum, c) => sum + c.credits, 0);
-  // Periods: each 10 credits = 1 period
+  const totalCredits = courses.reduce((s, c) => s + c.credits, 0);
   const totalPeriods = Math.round(totalCredits / CREDITS_PER_PERIOD);
-  const progress = calculateProgress();
+  const progress     = calculateProgress();
+  const subjects     = Object.keys(GRADUATION_REQUIREMENTS);
 
-  // Filter catalog for search
   const filteredCatalog = COURSE_CATALOG.filter(course => {
-    const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.code.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSubject = selectedSubject === 'all' || course.subject === selectedSubject;
-    const notAlreadyAdded = !courses.some(c => c.id === course.id);
-    return matchesSearch && matchesSubject && notAlreadyAdded;
+    const matchesSearch   = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            course.code.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSubject  = selectedSubject === 'all' || course.subject === selectedSubject;
+    const notAdded        = !courses.some(c => c.id === course.id);
+    const genderOk        = !course.genderRestriction || !studentInfo ||
+                            course.genderRestriction === studentInfo.gender;
+    return matchesSearch && matchesSubject && notAdded && genderOk;
   });
 
-  // Group courses by semester
   const groupBySemester = () => {
-    const groups = {
-      9: { Fall: [], Spring: [] },
-      10: { Fall: [], Spring: [] },
-      11: { Fall: [], Spring: [] },
-      12: { Fall: [], Spring: [] },
-    };
-
+    const g = { 9:{Fall:[],Spring:[]}, 10:{Fall:[],Spring:[]}, 11:{Fall:[],Spring:[]}, 12:{Fall:[],Spring:[]} };
     courses.forEach(course => {
-      if (groups[course.year]) {
-        if (course.semesters === 2) {
-          // Year-long course appears in both semesters
-          groups[course.year].Fall.push(course);
-          groups[course.year].Spring.push({ ...course, isSecondSemester: true });
-        } else {
-          groups[course.year][course.semester].push(course);
-        }
+      if (!g[course.year]) return;
+      if (course.semesters === 2) {
+        g[course.year].Fall.push(course);
+        g[course.year].Spring.push({ ...course, isSecondSemester: true });
+      } else {
+        g[course.year][course.semester].push(course);
       }
     });
-
-    return groups;
+    return g;
   };
 
-  // Group courses by subject area
   const groupBySubject = () => {
-    const groups = {};
-    Object.keys(GRADUATION_REQUIREMENTS).forEach(subject => {
-      groups[subject] = courses.filter(c => c.subject === subject);
-    });
-    return groups;
+    const g = {};
+    subjects.forEach(s => { g[s] = courses.filter(c => c.subject === s); });
+    return g;
   };
 
   const semesterGroups = groupBySemester();
-  const subjectGroups = groupBySubject();
+  const subjectGroups  = groupBySubject();
 
-  const subjects = Object.keys(GRADUATION_REQUIREMENTS);
-
-  // Prereq label helper
   const getPrereqLabel = (course) => {
     if (!course.prereqs || course.prereqs.length === 0) return null;
-    const names = course.prereqs.map(id => {
-      const c = COURSE_CATALOG.find(x => x.id === id);
-      return c ? c.name : id;
-    });
     if (course.prereqsAllRequired && course.prereqsAnyOfGroup) {
-      const reqNames = course.prereqsAllRequired.map(id => COURSE_CATALOG.find(x => x.id === id)?.name || id);
-      const anyNames = course.prereqsAnyOfGroup.map(id => COURSE_CATALOG.find(x => x.id === id)?.name || id);
-      return `Prereq: ${reqNames.join(', ')} AND (${anyNames.join(' or ')})`;
+      const rn = course.prereqsAllRequired.map(id => COURSE_CATALOG.find(x => x.id === id)?.name || id);
+      const an = course.prereqsAnyOfGroup.map(id => COURSE_CATALOG.find(x => x.id === id)?.name || id);
+      return `Prereq: ${rn.join(', ')} AND (${an.join(' or ')})`;
     }
-    if (course.prereqsAnyOf) {
-      return `Prereq (any one): ${names.join(' or ')}`;
-    }
-    return `Prereq: ${names.join(', ')}`;
+    const names = course.prereqs.map(id => COURSE_CATALOG.find(x => x.id === id)?.name || id);
+    return course.prereqsAnyOf ? `Prereq (any one): ${names.join(' or ')}` : `Prereq: ${names.join(', ')}`;
   };
 
+  // ── Show intro if no student yet ──────────────────────────────────────────
+  if (!studentInfo) return <IntroScreen onComplete={handleIntroComplete} />;
+
+  // ── Main UI ───────────────────────────────────────────────────────────────
   return (
     <div className="app">
-      <div className="container">
-        <header className="header">
-          <h1>Pius X 4-Year Course Planner</h1>
-          <div className="view-toggle">
-            <button 
-              className={viewMode === 'semester' ? 'active' : ''}
-              onClick={() => setViewMode('semester')}
-            >
-              Semester View
-            </button>
-            <button 
-              className={viewMode === 'subject' ? 'active' : ''}
-              onClick={() => setViewMode('subject')}
-            >
-              Subject Area View
-            </button>
-          </div>
-        </header>
 
-        <div className="progress-dashboard">
-          <div className="total-credits">
-            <h3>Total Credits: {totalCredits} / 230 ({totalPeriods} period{totalPeriods !== 1 ? 's' : ''} out of {TOTAL_PERIODS})</h3>
-            <div className="progress-bar">
-              <div 
-                className="progress-fill" 
-                style={{ width: `${Math.min(100, (totalCredits / 230) * 100)}%` }}
-              ></div>
-            </div>
-          </div>
-          <div className="requirements-grid">
-            {subjects.map(subject => {
-              const periods = Math.round(progress[subject].earned / CREDITS_PER_PERIOD);
-              const reqPeriods = Math.round(GRADUATION_REQUIREMENTS[subject] / CREDITS_PER_PERIOD);
-              return (
-                <div key={subject} className="requirement-item">
-                  <div className="requirement-header">
-                    <span className="subject-name">{subject}</span>
-                    <span className="credits">
-                      {progress[subject].earned}/{progress[subject].required}
-                      {reqPeriods > 0 && (
-                        <span className="period-note"> ({periods} of {reqPeriods} period{reqPeriods !== 1 ? 's' : ''})</span>
-                      )}
-                    </span>
-                  </div>
-                  <div className="progress-bar small">
-                    <div 
-                      className={`progress-fill ${progress[subject].earned >= progress[subject].required ? 'complete' : ''}`}
-                      style={{ width: `${progress[subject].percentage}%` }}
-                    ></div>
-                  </div>
-                </div>
-              );
-            })}
+      {/* Header */}
+      <header className="header">
+        <div className="header-left">
+          <img
+            src="https://piusxcatholic.github.io/course-planner/logo.png"
+            alt="Pius X"
+            className="header-logo"
+            onError={e => { e.target.style.display = 'none'; }}
+          />
+          <div>
+            <h1>Pius X 4-Year Course Planner</h1>
+            <p className="header-student">{studentInfo.name}</p>
           </div>
         </div>
+        <div className="header-right">
+          <div className="view-toggle">
+            <button className={viewMode === 'semester' ? 'active' : ''} onClick={() => setViewMode('semester')}>Schedule View</button>
+            <button className={viewMode === 'subject'  ? 'active' : ''} onClick={() => setViewMode('subject')}>Subject View</button>
+          </div>
+          <button className="btn-reset" onClick={resetPlan}>Start Over</button>
+        </div>
+      </header>
 
-        <div className="add-course-section">
-          <h2>Add Courses</h2>
+      {/* Progress Dashboard */}
+      <div className="progress-dashboard">
+        <div className="total-credits">
+          <h3>
+            Total Credits: {totalCredits} / 230
+            <span className="period-note"> ({totalPeriods} period{totalPeriods !== 1 ? 's' : ''} out of {TOTAL_PERIODS})</span>
+          </h3>
+          <div className="progress-bar">
+            <div className="progress-fill" style={{ width: `${Math.min(100,(totalCredits/230)*100)}%` }}></div>
+          </div>
+        </div>
+        <div className="requirements-grid">
+          {subjects.map(subject => {
+            const periods    = Math.round(progress[subject].earned / CREDITS_PER_PERIOD);
+            const reqPeriods = Math.round(GRADUATION_REQUIREMENTS[subject] / CREDITS_PER_PERIOD);
+            return (
+              <div key={subject} className="requirement-item">
+                <div className="requirement-header">
+                  <span className="subject-name">{subject}</span>
+                  <span className="credits">
+                    {progress[subject].earned}/{progress[subject].required}
+                    {reqPeriods > 0 && <span className="period-note"> ({periods}/{reqPeriods} per.)</span>}
+                  </span>
+                </div>
+                <div className="progress-bar small">
+                  <div
+                    className={`progress-fill${progress[subject].earned >= progress[subject].required ? ' complete' : ''}`}
+                    style={{ width: `${progress[subject].percentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Two-Column Main Layout ── */}
+      <div className="main-columns">
+
+        {/* LEFT: Add Courses */}
+        <div className="col-add-courses">
+          <h2 className="col-heading">Add Courses</h2>
           <div className="search-controls">
+            <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} className="subject-filter">
+              <option value="all">All Subjects</option>
+              {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
             <input
               type="text"
               placeholder="Search courses..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="search-input"
             />
-            <select 
-              value={selectedSubject}
-              onChange={(e) => setSelectedSubject(e.target.value)}
-              className="subject-filter"
-            >
-              <option value="all">All Subjects</option>
-              {subjects.map(subject => (
-                <option key={subject} value={subject}>{subject}</option>
-              ))}
-            </select>
           </div>
           <div className="course-catalog">
+            {filteredCatalog.length === 0 && <p className="empty-catalog">No courses match.</p>}
             {filteredCatalog.map(course => {
-              const prereqLabel = getPrereqLabel(course);
+              const prereqLabel  = getPrereqLabel(course);
               const meetsPrereqs = checkPrereqs(course, courses).length === 0;
               return (
                 <div key={course.id} className={`catalog-course-card${!meetsPrereqs ? ' prereq-blocked' : ''}`}>
                   <div className="course-info">
                     <h4>{course.name}</h4>
-                    <p className="course-code">{course.code}</p>
-                    <p className="course-details">
-                      {course.credits} credits • {course.subject}
-                      {course.isBandPair && <span className="band-badge"> • Sem 1 + Sem 2</span>}
-                    </p>
+                    <p className="course-meta">{course.code} · {course.credits} cr · {course.subject}</p>
+                    {course.isBandPair && <p className="band-badge">Sem 1 (Marching) + Sem 2 (Concert)</p>}
                     {prereqLabel && (
-                      <p className={`prereq-info ${!meetsPrereqs ? 'prereq-unmet' : 'prereq-met'}`}>
-                        {!meetsPrereqs ? '🔒 ' : '✓ '}{prereqLabel}
+                      <p className={`prereq-info${meetsPrereqs ? ' prereq-met' : ' prereq-unmet'}`}>
+                        {meetsPrereqs ? '✓ ' : '🔒 '}{prereqLabel}
                       </p>
                     )}
                   </div>
-                  <button 
+                  <button
                     onClick={() => addCourse(course)}
                     className={`btn-add-course${!meetsPrereqs ? ' btn-blocked' : ''}`}
                     title={!meetsPrereqs ? 'Prerequisites not yet met' : 'Add to plan'}
                   >
-                    {!meetsPrereqs ? 'Locked' : 'Add'}
+                    {meetsPrereqs ? 'Add' : 'Locked'}
                   </button>
                 </div>
               );
@@ -527,136 +572,131 @@ function App() {
           </div>
         </div>
 
-        {viewMode === 'semester' && (
-          <div className="semester-view">
-            {[9, 10, 11, 12].map(year => (
-              <div key={year} className="year-section">
-                <h2>{getYearLabel(year)} - Grade {year}</h2>
-                <div className="semesters-row">
-                  {['Fall', 'Spring'].map(semester => (
-                    <div key={semester} className="semester-column">
-                      <h3>{semester}</h3>
-                      <div className="courses-list">
-                        {semesterGroups[year][semester].map(course => (
-                          <div key={course.uniqueId + (course.isSecondSemester ? '-spring' : '')} className="course-card">
-                            <div className="course-card-header">
-                              <h4>{course.isBandPair ? (course.isSecondSemester ? 'Concert Band' : 'Marching Band') : course.name}</h4>
-                              {!course.isSecondSemester && (
-                                <button
-                                  onClick={() => deleteCourse(course.uniqueId)}
-                                  className="btn-delete"
-                                >
-                                  ×
-                                </button>
-                              )}
-                            </div>
-                            <p className="course-code">{course.code}</p>
-                            <p className="course-credits">
-                              {course.semesters === 2 ? `${course.credits} credits (Year-long)` : `${course.credits} credits`}
-                            </p>
-                            <p className="course-subject">{course.subject}</p>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="semester-credits">
-                        Credits: {semesterGroups[year][semester].reduce((sum, c) => {
-                          // For year-long courses, count full credits in fall, 0 in spring to avoid double-counting
-                          if (c.semesters === 2 && semester === 'Spring') return sum;
-                          return sum + c.credits;
-                        }, 0)}
-                        {' '}({Math.round(semesterGroups[year][semester].filter(c => !(c.semesters === 2 && semester === 'Spring')).reduce((sum, c) => sum + c.credits, 0) / 5)} periods out of 8)
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* RIGHT: Schedule / Subject View */}
+        <div className="col-plan">
 
-        {viewMode === 'subject' && (
-          <div className="subject-view">
-            {subjects.map(subject => (
-              <div key={subject} className="subject-section">
-                <div className="subject-header">
-                  <h2>{subject}</h2>
-                  <div className="subject-progress">
-                    <span className="progress-text">
-                      {progress[subject].earned} / {progress[subject].required} credits
-                      {' '}({Math.round(progress[subject].earned / CREDITS_PER_PERIOD)} of {Math.round(GRADUATION_REQUIREMENTS[subject] / CREDITS_PER_PERIOD)} periods)
-                    </span>
-                    <div className="progress-bar">
-                      <div 
-                        className={`progress-fill ${progress[subject].earned >= progress[subject].required ? 'complete' : ''}`}
-                        style={{ width: `${progress[subject].percentage}%` }}
-                      ></div>
-                    </div>
+          {viewMode === 'semester' && (
+            <div className="semester-view">
+              {[9,10,11,12].map(year => (
+                <div key={year} className="year-section">
+                  <h2 className="year-heading">{getYearLabel(year)} — Grade {year}</h2>
+                  <div className="semesters-row">
+                    {['Fall','Spring'].map(semester => {
+                      const semCourses  = semesterGroups[year][semester];
+                      const semCredits  = semCourses
+                        .filter(c => !(c.semesters === 2 && semester === 'Spring'))
+                        .reduce((s, c) => s + c.credits, 0);
+                      const semPeriods  = Math.round(semCredits / 5);
+                      return (
+                        <div key={semester} className="semester-column">
+                          <h3 className="semester-heading">{semester}</h3>
+                          <div className="courses-list">
+                            {semCourses.map(course => (
+                              <div
+                                key={course.uniqueId + (course.isSecondSemester ? '-sp' : '')}
+                                className="course-card"
+                              >
+                                <div className="course-card-header">
+                                  <h4>
+                                    {course.isBandPair
+                                      ? (course.isSecondSemester ? 'Concert Band' : 'Marching Band')
+                                      : course.name}
+                                  </h4>
+                                  {!course.isSecondSemester && (
+                                    <button onClick={() => deleteCourse(course.uniqueId)} className="btn-delete">×</button>
+                                  )}
+                                </div>
+                                <p className="course-meta">{course.code}</p>
+                                <p className="course-meta">
+                                  {course.semesters === 2 ? `${course.credits} cr (Year-long)` : `${course.credits} cr`}
+                                </p>
+                                <p className="course-meta course-subject-tag">{course.subject}</p>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="semester-credits">
+                            {semCredits} cr ({semPeriods} of 8 periods)
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-                <div className="subject-courses">
-                  {subjectGroups[subject].length === 0 ? (
-                    <p className="empty-subject">No courses added yet</p>
-                  ) : (
-                    subjectGroups[subject].map(course => (
-                      <div key={course.uniqueId} className="course-card">
-                        <div className="course-card-header">
-                          <div>
-                            <h4>{course.name}</h4>
-                            <p className="course-year-badge">{getYearLabel(course.year)} • {course.semester}</p>
-                          </div>
-                          <button
-                            onClick={() => deleteCourse(course.uniqueId)}
-                            className="btn-delete"
-                          >
-                            ×
-                          </button>
-                        </div>
-                        <p className="course-code">{course.code}</p>
-                        <p className="course-credits">{course.credits} credits</p>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
-        {showPrereqModal && prereqError && (
-          <div className="modal-overlay" onClick={() => setShowPrereqModal(false)}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>Prerequisite Required</h3>
-                <button onClick={() => setShowPrereqModal(false)} className="btn-close">×</button>
-              </div>
-              <div className="modal-body">
-                <p>
-                  Cannot add <strong>{prereqError.courseName}</strong>. 
-                  {prereqError.isAnyOf
-                    ? ' You must first complete at least one of the following:'
-                    : ' You must first complete the following prerequisite(s):'}
-                </p>
-                <ul className="prereq-list">
-                  {prereqError.missingNames.map((name, idx) => (
-                    <li key={idx}>{name}</li>
-                  ))}
-                </ul>
-                <div className="modal-actions">
-                  {prereqError.missingPrereqs.map((prereqId, idx) => (
-                    <button 
-                      key={prereqId}
-                      onClick={() => addMissingPrereq(prereqId)}
-                      className="btn-add-prereq"
-                    >
-                      Add {prereqError.missingNames[idx]}
-                    </button>
-                  ))}
+          {viewMode === 'subject' && (
+            <div className="subject-view">
+              {subjects.map(subject => (
+                <div key={subject} className="subject-section">
+                  <div className="subject-header">
+                    <h2>{subject}</h2>
+                    <div className="subject-progress">
+                      <span className="progress-text">
+                        {progress[subject].earned} / {progress[subject].required} cr
+                        {' '}({Math.round(progress[subject].earned/CREDITS_PER_PERIOD)}/
+                        {Math.round(GRADUATION_REQUIREMENTS[subject]/CREDITS_PER_PERIOD)} periods)
+                      </span>
+                      <div className="progress-bar">
+                        <div
+                          className={`progress-fill${progress[subject].earned >= progress[subject].required ? ' complete' : ''}`}
+                          style={{ width: `${progress[subject].percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="subject-courses">
+                    {subjectGroups[subject].length === 0
+                      ? <p className="empty-subject">No courses added yet</p>
+                      : subjectGroups[subject].map(course => (
+                          <div key={course.uniqueId} className="course-card">
+                            <div className="course-card-header">
+                              <div>
+                                <h4>{course.name}</h4>
+                                <p className="course-meta">{getYearLabel(course.year)} · {course.semester}</p>
+                              </div>
+                              <button onClick={() => deleteCourse(course.uniqueId)} className="btn-delete">×</button>
+                            </div>
+                            <p className="course-meta">{course.code} · {course.credits} cr</p>
+                          </div>
+                        ))
+                    }
+                  </div>
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Prereq Modal */}
+      {showPrereqModal && prereqError && (
+        <div className="modal-overlay" onClick={() => setShowPrereqModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Prerequisite Required</h3>
+              <button onClick={() => setShowPrereqModal(false)} className="btn-close">×</button>
+            </div>
+            <div className="modal-body">
+              <p>
+                Cannot add <strong>{prereqError.courseName}</strong>.{' '}
+                {prereqError.isAnyOf ? 'Complete at least one of:' : 'Complete the following first:'}
+              </p>
+              <ul className="prereq-list">
+                {prereqError.missingNames.map((name, i) => <li key={i}>{name}</li>)}
+              </ul>
+              <div className="modal-actions">
+                {prereqError.missingPrereqs.map((id, i) => (
+                  <button key={id} onClick={() => addMissingPrereq(id)} className="btn-add-prereq">
+                    Add {prereqError.missingNames[i]}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
