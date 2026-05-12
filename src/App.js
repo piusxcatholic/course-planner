@@ -448,7 +448,11 @@ function App() {
 
     if (info.music.includes('band')) {
       const band = COURSE_CATALOG.find(x => x.id === 'BAND');
-      if (band) seed.push({ ...band, uniqueId: now + 12, year: 9, semester: 'Fall' });
+      if (band) {
+        [9, 10, 11, 12].forEach((yr, i) => {
+          seed.push({ ...band, uniqueId: now + 12 + i, year: yr, semester: 'Fall' });
+        });
+      }
     }
     if (info.music.includes('choir')) {
       const choirId = info.gender === 'female' ? 'WOMENCHOIR' : 'MENCHOIR';
@@ -492,6 +496,17 @@ function App() {
         if (c && !courses.some(x => x.id === id))
           newCourses.push({ ...c, uniqueId: Date.now() + i + 1, year: 10 + i, semester: 'Fall' });
       });
+    }
+    // Auto-add band for years 10-12 when band is added as a freshman
+    if (course.id === 'BAND' && year === 9) {
+      const band = COURSE_CATALOG.find(x => x.id === 'BAND');
+      if (band) {
+        [10, 11, 12].forEach((yr, i) => {
+          if (!newCourses.some(x => x.id === 'BAND' && x.year === yr)) {
+            newCourses.push({ ...band, uniqueId: Date.now() + 100 + i, year: yr, semester: 'Fall' });
+          }
+        });
+      }
     }
     setCourses(newCourses);
     setPlaceModal(null);
@@ -632,6 +647,43 @@ function App() {
 
   const firstName = studentInfo.name.split(' ')[0];
 
+  // ── Missing required subjects per year ────────────────────────────────────
+  // Returns array of display strings for subjects not yet covered in that grade
+  const REQUIRED_SUBJECTS_BY_YEAR = {
+    9:  ['Theology', 'Math', 'Science', 'PE', 'English', 'Social Studies'],
+    10: ['Theology', 'Math', 'Science', 'English', 'Social Studies'],
+    11: ['Theology', 'Math', 'Science', 'English'],
+    12: ['Theology', 'Science', 'English'],
+  };
+  // Social studies special rules per year
+  const SS_REQUIRED = {
+    11: { ids: ['USHIST', 'APUSHIST'],  label: 'US History' },
+    12: { ids: ['AMGOV',  'APAMGOV'],   label: 'Am. Government' },
+  };
+
+  const getMissingSubjects = (year) => {
+    const required = REQUIRED_SUBJECTS_BY_YEAR[year] || [];
+    const yearCourses = courses.filter(c => c.year === year && !c.isMisc);
+    const missing = [];
+
+    required.forEach(subject => {
+      if (subject === 'Social Studies' && SS_REQUIRED[year]) {
+        // Check specifically for the required SS course
+        const { ids, label } = SS_REQUIRED[year];
+        const hasCourse = yearCourses.some(c => ids.includes(c.id));
+        if (!hasCourse) missing.push(label);
+      } else {
+        const hasCourse = yearCourses.some(c => c.subject === subject);
+        if (!hasCourse) {
+          // Capitalize first letter only
+          missing.push(subject.charAt(0).toUpperCase() + subject.slice(1).toLowerCase());
+        }
+      }
+    });
+
+    return missing;
+  };
+
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <div className="app">
@@ -767,9 +819,18 @@ function App() {
 
           {viewMode === 'semester' && (
             <div className="semester-view">
-              {[9,10,11,12].map(year => (
+              {[9,10,11,12].map(year => {
+                const missingSubjects = getMissingSubjects(year);
+                return (
                 <div key={year} className="year-section">
-                  <h2 className="year-heading">{YEAR_LABELS[year]} — Grade {year}</h2>
+                  <h2 className="year-heading">
+                    <span className="year-heading-title">{YEAR_LABELS[year]} — Grade {year}</span>
+                    {missingSubjects.length > 0 && (
+                      <span className="year-missing">
+                        Still needed: {missingSubjects.join(' · ')}
+                      </span>
+                    )}
+                  </h2>
                   <div className="semesters-row">
                     {['Fall','Spring'].map(semester => {
                       const semCourses = semesterGroups[year][semester];
@@ -833,7 +894,7 @@ function App() {
                     })}
                   </div>
                 </div>
-              ))}
+              );})}
             </div>
           )}
 
