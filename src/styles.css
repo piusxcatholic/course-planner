@@ -29,7 +29,41 @@ body {
   font-size: 14px;
   line-height: 1.5;
 }
+.year-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
 
+.year-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.year-tab.active {
+  border-color: #046a38;
+  background: #046a38;
+  color: white;
+}
+
+.year-tab-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.year-tab-credits {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  margin-top: 2px;
+}
 /* ── Intro ────────────────────────────────────────────────────── */
 .intro-overlay {
   min-height: 100vh;
