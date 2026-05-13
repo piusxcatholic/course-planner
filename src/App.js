@@ -412,6 +412,7 @@ function App() {
   const [studentInfo,     setStudentInfo]     = useState(null);
   const [courses,         setCourses]         = useState([]);
   const [viewMode,        setViewMode]        = useState('semester');
+  const [activeYear,      setActiveYear]      = useState(9);
   const [searchTerm,      setSearchTerm]      = useState('');
   const [selectedSubject, setSelectedSubject] = useState('all');
 
@@ -878,87 +879,153 @@ function App() {
 
           {viewMode === 'semester' && (
             <div className="semester-view">
-              {/* Print groups: page 1 = grades 9+10, page 2 = grades 11+12 */}
-              {[[9,10],[11,12]].map((yearPair, pairIdx) => (
-                <div key={pairIdx} className="print-page-group">
-                  {yearPair.map(year => {
-                const missingSubjects = getMissingSubjects(year);
-                return (
-                <div key={year} className="year-section">
-                  <h2 className="year-heading">
-                    <span className="year-heading-title">{YEAR_LABELS[year]} — Grade {year}</span>
-                    {missingSubjects.length > 0 && (
-                      <span className="year-missing">
-                        Still needed: {missingSubjects.join(' · ')}
-                      </span>
-                    )}
-                  </h2>
-                  <div className="semesters-row">
-                    {['Fall','Spring'].map(semester => {
-                      const semCourses = semesterGroups[year][semester];
-                      const semCredits = semCourses.filter(c => c._countCredits).reduce((s, c) => s + c.credits, 0);
-                      const semPeriods = semCourses.filter(c => c._countCredits)
-                        .reduce((s, c) => s + (c.semesters === 2 ? 1 : c.credits / 5), 0);
 
-                      return (
-                        <div key={semester} className="semester-column">
-                          <h3 className="semester-heading">{semester}</h3>
-                          <div className="courses-list">
-                            {semCourses.map(course => {
-                              const displayName = course.isBandPair
-                                ? (course.isSecondSemester ? 'Concert Band' : 'Marching Band')
-                                : course.name;
-                              const isMoveable = !course.isSecondSemester;
-                              return (
-                                <div
-                                  key={course.uniqueId + (course.isSecondSemester ? '-sp' : '')}
-                                  className={`course-card${course.isMisc ? ' course-card-misc' : ''}`}
-                                >
-                                  <div className="course-card-header">
-                                    <h4>
-                                      {displayName}
-                                      {course.isAP   && <span className="tag tag-ap">AP</span>}
-                                      {course.isDual && <span className="tag tag-dual">Dual</span>}
-                                    </h4>
-                                    {isMoveable && (
-                                      <div className="course-card-actions">
-                                        <button
-                                          className="btn-move"
-                                          onClick={() => requestMoveCourse(course)}
-                                          title="Move to different semester"
-                                        >
-                                          ↕
-                                        </button>
-                                        <button
-                                          className="btn-delete"
-                                          onClick={() => deleteCourse(course.uniqueId)}
-                                          title="Remove course"
-                                        >
-                                          ×
-                                        </button>
+              {/* ── Year stepper (screen only) ── */}
+              <div className="year-stepper print-hide">
+                {[9,10,11,12].map(yr => (
+                  <button
+                    key={yr}
+                    className={`year-step-btn${activeYear === yr ? ' active' : ''}`}
+                    onClick={() => setActiveYear(yr)}
+                  >
+                    {YEAR_LABELS[yr]}
+                  </button>
+                ))}
+              </div>
+
+              {/* ── Single active year (screen) ── */}
+              <div className="print-hide">
+                {(() => {
+                  const year = activeYear;
+                  const missingSubjects = getMissingSubjects(year);
+                  return (
+                    <div className="year-section">
+                      <h2 className="year-heading">
+                        <span className="year-heading-title">{YEAR_LABELS[year]} — Grade {year}</span>
+                        {missingSubjects.length > 0 && (
+                          <span className="year-missing">
+                            Still needed: {missingSubjects.join(' · ')}
+                          </span>
+                        )}
+                      </h2>
+                      <div className="semesters-row">
+                        {['Fall','Spring'].map(semester => {
+                          const semCourses = semesterGroups[year][semester];
+                          const semCredits = semCourses.filter(c => c._countCredits).reduce((s, c) => s + c.credits, 0);
+                          const semPeriods = semCourses.filter(c => c._countCredits)
+                            .reduce((s, c) => s + (c.semesters === 2 ? 1 : c.credits / 5), 0);
+                          return (
+                            <div key={semester} className="semester-column">
+                              <h3 className="semester-heading">{semester}</h3>
+                              <div className="courses-list">
+                                {semCourses.map(course => {
+                                  const displayName = course.isBandPair
+                                    ? (course.isSecondSemester ? 'Concert Band' : 'Marching Band')
+                                    : course.name;
+                                  const isMoveable = !course.isSecondSemester;
+                                  return (
+                                    <div
+                                      key={course.uniqueId + (course.isSecondSemester ? '-sp' : '')}
+                                      className={`course-card${course.isMisc ? ' course-card-misc' : ''}`}
+                                      title={course.code || ''}
+                                    >
+                                      <div className="course-card-header">
+                                        <div className="course-card-name-block">
+                                          <h4>
+                                            {displayName}
+                                            {course.isAP   && <span className="tag tag-ap">AP</span>}
+                                            {course.isDual && <span className="tag tag-dual">Dual</span>}
+                                          </h4>
+                                          <span className="course-duration-label">
+                                            {course.semesters === 2 ? 'Year-long' : 'Semester'}
+                                          </span>
+                                        </div>
+                                        {isMoveable && (
+                                          <div className="course-card-actions">
+                                            <button className="btn-move" onClick={() => requestMoveCourse(course)} title="Move">↕</button>
+                                            <button className="btn-delete" onClick={() => deleteCourse(course.uniqueId)} title="Remove">×</button>
+                                          </div>
+                                        )}
                                       </div>
-                                    )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              <div className="semester-credits">
+                                {semCredits} cr · {Math.round(semPeriods)} of 8 periods
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* ── Print: all four years, two per page ── */}
+              <div className="print-only">
+                {[[9,10],[11,12]].map((yearPair, pairIdx) => (
+                  <div key={pairIdx} className="print-page-group">
+                    {yearPair.map(year => {
+                      const missingSubjects = getMissingSubjects(year);
+                      return (
+                        <div key={year} className="year-section">
+                          <h2 className="year-heading">
+                            <span className="year-heading-title">{YEAR_LABELS[year]} — Grade {year}</span>
+                            {missingSubjects.length > 0 && (
+                              <span className="year-missing">Still needed: {missingSubjects.join(' · ')}</span>
+                            )}
+                          </h2>
+                          <div className="semesters-row">
+                            {['Fall','Spring'].map(semester => {
+                              const semCourses = semesterGroups[year][semester];
+                              const semCredits = semCourses.filter(c => c._countCredits).reduce((s, c) => s + c.credits, 0);
+                              const semPeriods = semCourses.filter(c => c._countCredits)
+                                .reduce((s, c) => s + (c.semesters === 2 ? 1 : c.credits / 5), 0);
+                              return (
+                                <div key={semester} className="semester-column">
+                                  <h3 className="semester-heading">{semester}</h3>
+                                  <div className="courses-list">
+                                    {semCourses.map(course => {
+                                      const displayName = course.isBandPair
+                                        ? (course.isSecondSemester ? 'Concert Band' : 'Marching Band')
+                                        : course.name;
+                                      return (
+                                        <div
+                                          key={course.uniqueId + (course.isSecondSemester ? '-sp' : '')}
+                                          className={`course-card${course.isMisc ? ' course-card-misc' : ''}`}
+                                        >
+                                          <div className="course-card-header">
+                                            <div className="course-card-name-block">
+                                              <h4>
+                                                {displayName}
+                                                {course.isAP   && <span className="tag tag-ap">AP</span>}
+                                                {course.isDual && <span className="tag tag-dual">Dual</span>}
+                                              </h4>
+                                              <span className="course-duration-label">
+                                                {course.semesters === 2 ? 'Year-long' : 'Semester'}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
-                                  <p className="course-meta">{course.code}</p>
-                                  <p className="course-meta">
-                                    {course.semesters === 2 ? `${course.credits} cr (Year-long)` : `${course.credits} cr`}
-                                  </p>
-                                  <p className="course-meta course-subject-tag">{course.subject}</p>
+                                  <div className="semester-credits">
+                                    {semCredits} cr · {Math.round(semPeriods)} of 8 periods
+                                  </div>
                                 </div>
                               );
                             })}
-                          </div>
-                          <div className="semester-credits">
-                            {semCredits} cr · {Math.round(semPeriods)} of 8 periods
                           </div>
                         </div>
                       );
                     })}
                   </div>
-                </div>
-                );})}
-                </div>
-              ))}
+                ))}
+              </div>
+
             </div>
           )}
 
