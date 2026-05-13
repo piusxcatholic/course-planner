@@ -447,14 +447,17 @@ function App() {
   const [searchTerm,      setSearchTerm]      = useState('');
   const [selectedSubject, setSelectedSubject] = useState('all');
 
-  const [dismissedLangSuggestions, setDismissedLangSuggestions] = useState(new Set());
-
-  const dismissLangSuggestion = (courseId) =>
-    setDismissedLangSuggestions(prev => new Set([...prev, courseId]));
+  // Modals
+  const [prereqModal,  setPrereqModal]  = useState(null);
   const [placeModal,   setPlaceModal]   = useState(null);
   const [moveModal,    setMoveModal]    = useState(null);
   const [miscModal,    setMiscModal]    = useState(false);
-  const [langSuggest,  setLangSuggest]  = useState(null); // { suggestions: [{course, year}] }
+  const [langSuggest,  setLangSuggest]  = useState(null);
+
+  // Inline language suggestion dismissals
+  const [dismissedLangSuggestions, setDismissedLangSuggestions] = useState(new Set());
+  const dismissLangSuggestion = (courseId) =>
+    setDismissedLangSuggestions(prev => new Set([...prev, courseId]));
 
   useEffect(() => {
     const si = localStorage.getItem('piusXStudentInfo');
