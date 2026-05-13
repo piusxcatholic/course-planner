@@ -29,41 +29,7 @@ body {
   font-size: 14px;
   line-height: 1.5;
 }
-.year-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
 
-.year-tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 12px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  background: white;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.year-tab.active {
-  border-color: #046a38;
-  background: #046a38;
-  color: white;
-}
-
-.year-tab-label {
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.year-tab-credits {
-  font-size: 0.75rem;
-  opacity: 0.75;
-  margin-top: 2px;
-}
 /* ── Intro ────────────────────────────────────────────────────── */
 .intro-overlay {
   min-height: 100vh;
@@ -276,13 +242,14 @@ body {
   min-width: 100px;
 }
 .badge-ap   { background: #e8f4ee; border: 1.5px solid var(--green-mid); }
-.badge-dual { background: #e3f2fd; border: 1.5px solid #90caf9; }
+.badge-dual { background: #e3f2fd; border: 1.5px solid #90caf9; min-width: 140px; }
 .badge-label {
   font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: var(--text-soft);
+  white-space: nowrap;
 }
 .badge-value { font-size: 1.25rem; font-weight: 800; color: var(--green); }
 .badge-dual .badge-value { color: #1565c0; }
@@ -779,13 +746,45 @@ body {
 
 /* ── Print ───────────────────────────────────────────────────── */
 @media print {
+  /* Hide everything that's not the schedule */
   .header-actions, .btn-reset, .col-add-courses,
-  .btn-delete, .btn-move, .view-toggle { display: none !important; }
+  .btn-delete, .btn-move, .view-toggle,
+  .progress-dashboard, .misc-bar { display: none !important; }
+
+  /* Reset layout so only the schedule column shows */
+  .app { display: block; }
   .main-columns { display: block; }
   .col-plan { width: 100%; overflow: visible; }
-  .header { position: static; box-shadow: none; }
-  .semester-view, .subject-view { padding: 6px; }
-  .year-section, .subject-section { break-inside: avoid; margin-bottom: 10px; }
+  .header { position: static; box-shadow: none; padding: 8px 14px; }
+  .header-left h1 { font-size: 0.95rem; }
+
+  /* Semester view: no padding, no gap — the page groups handle spacing */
+  .semester-view { padding: 0; gap: 0; }
+
+  /* Each page group (9+10 or 11+12) fills one printed page, side by side */
+  .print-page-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    page-break-after: always;
+    break-after: page;
+    padding: 10px 0;
+    align-items: start;
+  }
+
+  /* Don't break inside a year section or a course card */
+  .year-section   { break-inside: avoid; margin-bottom: 0; box-shadow: none; border: 1px solid #ccc; }
+  .course-card    { break-inside: avoid; }
+  .semester-column { padding: 7px 9px; }
+
+  /* Tighten up text for print */
+  .course-card-header h4  { font-size: 0.72rem; }
+  .course-meta            { font-size: 0.65rem; }
+  .semester-credits       { font-size: 0.65rem; }
+  .year-heading           { font-size: 0.75rem; padding: 7px 10px; }
+  .semester-heading       { font-size: 0.68rem; }
+  .year-missing           { font-size: 0.6rem; }
+  .tag                    { font-size: 0.55rem; }
 }
 
 /* ── Responsive ──────────────────────────────────────────────── */
