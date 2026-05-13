@@ -31,8 +31,8 @@ const COURSE_CATALOG = [
   { id: 'ALGESS',    name: 'Algebra Essentials',        code: 'MATH075', credits: 10, subject: 'Math', grade: 9,  prereqs: [], semesters: 2 },
   { id: 'ALG1',      name: 'Algebra I',                 code: 'MATH070', credits: 10, subject: 'Math', grade: 9,  prereqs: [], semesters: 2 },
   { id: 'DIFFALG1',  name: 'Differentiated Algebra I',  code: 'MATH000', credits: 10, subject: 'Math', grade: 9,  prereqs: [], semesters: 2 },
-  { id: 'DIFFGEOM',  name: 'Differentiated Geometry',   code: 'MATH010', credits: 10, subject: 'Math', grade: 9,  prereqs: ['DIFFALG1'], semesters: 2 },
-  { id: 'GEOM',      name: 'Geometry',                  code: 'MATH090', credits: 10, subject: 'Math', grade: 10, prereqs: ['ALG1','DIFFALG1'], prereqsAnyOf: true, semesters: 2 },
+  { id: 'DIFFGEOM',  name: 'Differentiated Geometry',   code: 'MATH010', credits: 10, subject: 'Math', grade: 9,  prereqs: ['DIFFALG1'], semesters: 2, assumePrereqsMet: true },
+  { id: 'GEOM',      name: 'Geometry',                  code: 'MATH090', credits: 10, subject: 'Math', grade: 10, prereqs: ['ALG1','DIFFALG1'], prereqsAnyOf: true, semesters: 2, assumePrereqsMet: true },
   { id: 'DIFFALG2',  name: 'Differentiated Algebra II', code: 'MATH020', credits: 10, subject: 'Math', grade: 10, prereqs: ['DIFFGEOM','GEOM'], prereqsAnyOf: true, semesters: 2 },
   { id: 'ALG2',      name: 'Algebra II',                code: 'MATH100', credits: 10, subject: 'Math', grade: 11, prereqs: ['ALG1','DIFFALG1'], prereqsAnyOf: true, semesters: 2 },
   { id: 'APSTATS',   name: 'AP Statistics',             code: 'MATH040', credits: 10, subject: 'Math', grade: 11, prereqs: ['ALG2','DIFFALG2'], prereqsAnyOf: true, semesters: 2, isAP: true },
@@ -154,7 +154,19 @@ const LANGUAGE_CHAINS = {
 
 // ─── Prereq checker ──────────────────────────────────────────────────────────
 const checkPrereqs = (catalogCourse, addedCourses) => {
+  // If this course assumes its own prereqs are met (e.g. student is starting at this level), skip
+  if (catalogCourse.assumePrereqsMet) return [];
+
   const addedIds = new Set(addedCourses.map(c => c.id));
+
+  // Also treat Geometry/DiffGeometry as satisfying their own prereqs if already on the schedule
+  // (so downstream courses like Physics that need GEOM don't block)
+  if (addedCourses.some(c => c.id === 'GEOM' || c.id === 'DIFFGEOM')) {
+    addedIds.add('GEOM');
+    addedIds.add('DIFFGEOM');
+    addedIds.add('ALG1');
+    addedIds.add('DIFFALG1');
+  }
   if (catalogCourse.prereqsAllRequired && catalogCourse.prereqsAnyOfGroup) {
     const missingAll = catalogCourse.prereqsAllRequired.filter(id => !addedIds.has(id));
     const anyOfMet   = catalogCourse.prereqsAnyOfGroup.some(id => addedIds.has(id));
@@ -311,10 +323,11 @@ function MiscModal({ onConfirm, onCancel }) {
 
 // ─── Intro Screen ─────────────────────────────────────────────────────────────
 function IntroScreen({ onComplete }) {
-  const [name,         setName]         = useState('');
-  const [gender,       setGender]       = useState('');
-  const [startingMath, setStartingMath] = useState('');
-  const [music,        setMusic]        = useState([]);
+  const [name,          setName]          = useState('');
+  const [gender,        setGender]        = useState('');
+  const [startingMath,  setStartingMath]  = useState('');
+  const [music,         setMusic]         = useState([]);
+  const [worldLanguage, setWorldLanguage] = useState('');
 
   const toggleMusic = (val) =>
     setMusic(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]);
@@ -388,12 +401,30 @@ function IntroScreen({ onComplete }) {
               ))}
             </div>
           </div>
+
+          <div className="intro-field">
+            <label>World Language Preference</label>
+            <div className="intro-toggle-group">
+              {[
+                { val: 'LATIN1',   label: 'Latin'   },
+                { val: 'FRENCH1',  label: 'French'  },
+                { val: 'SPANISH1', label: 'Spanish' },
+              ].map(opt => (
+                <button key={opt.val}
+                  className={`intro-toggle${worldLanguage === opt.val ? ' selected' : ''}`}
+                  onClick={() => setWorldLanguage(worldLanguage === opt.val ? '' : opt.val)}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <p style={{fontSize:'0.72rem', color:'#888', marginTop:3}}>Optional — you can add languages manually later</p>
+          </div>
         </div>
 
         <div className="intro-footer">
           <button
             className="intro-submit"
-            onClick={() => canSubmit && onComplete({ name: name.trim(), gender, startingMath, music })}
+            onClick={() => canSubmit && onComplete({ name: name.trim(), gender, startingMath, music, worldLanguage })}
             disabled={!canSubmit}
           >
             Build My Plan →
@@ -416,8 +447,10 @@ function App() {
   const [searchTerm,      setSearchTerm]      = useState('');
   const [selectedSubject, setSelectedSubject] = useState('all');
 
-  // Modals
-  const [prereqModal,  setPrereqModal]  = useState(null);
+  const [dismissedLangSuggestions, setDismissedLangSuggestions] = useState(new Set());
+
+  const dismissLangSuggestion = (courseId) =>
+    setDismissedLangSuggestions(prev => new Set([...prev, courseId]));
   const [placeModal,   setPlaceModal]   = useState(null);
   const [moveModal,    setMoveModal]    = useState(null);
   const [miscModal,    setMiscModal]    = useState(false);
@@ -454,6 +487,21 @@ function App() {
     const peId = info.gender === 'female' ? 'GIRLSPEHEALTH' : 'BOYSPEHEALTH';
     const pe   = COURSE_CATALOG.find(x => x.id === peId);
     if (pe) seed.push({ ...pe, uniqueId: now + 11, year: 9, semester: 'Fall' });
+
+    // Auto-add English I (9th) and English II (10th)
+    const eng1 = COURSE_CATALOG.find(x => x.id === 'ENG1');
+    const eng2 = COURSE_CATALOG.find(x => x.id === 'ENG2');
+    if (eng1) seed.push({ ...eng1, uniqueId: now + 14, year: 9,  semester: 'Fall' });
+    if (eng2) seed.push({ ...eng2, uniqueId: now + 15, year: 10, semester: 'Fall' });
+
+    // Auto-add world language 1 (9th) and 2 (10th) if selected
+    if (info.worldLanguage) {
+      const lang1 = COURSE_CATALOG.find(x => x.id === info.worldLanguage);
+      const lang2Chain = LANGUAGE_CHAINS[info.worldLanguage];
+      const lang2 = lang2Chain?.[0] ? COURSE_CATALOG.find(x => x.id === lang2Chain[0]) : null;
+      if (lang1) seed.push({ ...lang1, uniqueId: now + 16, year: 9,  semester: 'Fall' });
+      if (lang2) seed.push({ ...lang2, uniqueId: now + 17, year: 10, semester: 'Fall' });
+    }
 
     if (info.music.includes('band')) {
       const band = COURSE_CATALOG.find(x => x.id === 'BAND');
@@ -669,6 +717,26 @@ function App() {
 
   const semesterGroups = groupBySemester();
   const subjectGroups  = groupBySubject();
+
+  // ── Language level suggestions for junior/senior year banners ─────────────
+  // Returns the lang3/lang4 catalog course if it should be suggested for the given year,
+  // null if already added or no language was chosen
+  const getLangSuggestion = (year) => {
+    const wl = studentInfo?.worldLanguage;
+    if (!wl) return null;
+    const chain = LANGUAGE_CHAINS[wl];
+    const targetIdx = year === 11 ? 1 : year === 12 ? 2 : null;
+    if (targetIdx === null) return null;
+    const targetId = chain?.[targetIdx];
+    if (!targetId) return null;
+    if (courses.some(c => c.id === targetId)) return null;
+    if (dismissedLangSuggestions.has(targetId)) return null;
+    return COURSE_CATALOG.find(x => x.id === targetId) || null;
+  };
+
+  const acceptLangInline = (course, year) => {
+    setCourses(prev => [...prev, { ...course, uniqueId: Date.now(), year, semester: 'Fall' }]);
+  };
 
   // ── Prereq label ──────────────────────────────────────────────────────────
   const getPrereqLabel = (course) => {
@@ -908,6 +976,26 @@ function App() {
                           </span>
                         )}
                       </h2>
+                      {/* Inline language suggestion banner for junior/senior year */}
+                      {(() => {
+                        const suggestion = getLangSuggestion(year);
+                        if (!suggestion) return null;
+                        const yearName = year === 11 ? 'Junior' : 'Senior';
+                        return (
+                          <div className="lang-suggest-banner">
+                            <div className="lang-suggest-text">
+                              <span className="lang-suggest-icon">🌐</span>
+                              <span>Continue with <strong>{suggestion.name}</strong> {yearName} year?</span>
+                            </div>
+                            <div className="lang-suggest-actions">
+                              <button className="lang-suggest-skip" onClick={() => dismissLangSuggestion(suggestion.id)}>Skip</button>
+                              <button className="lang-suggest-confirm" onClick={() => acceptLangInline(suggestion, year)}>
+                                Add to {yearName} year →
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })()}
                       <div className="semesters-row">
                         {['Fall','Spring'].map(semester => {
                           const semCourses = semesterGroups[year][semester];
