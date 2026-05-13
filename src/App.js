@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
+import './styles.css';
 
 // Course catalog with all courses from handbook
 const COURSE_CATALOG = [
